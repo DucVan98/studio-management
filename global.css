@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Everly Design Tokens – Figma "Theme" collection ──────────────────────── */
+/* CSS variables cho Expo Web. Native dùng NativeWind vars() trong themes.ts   */
+
+@layer base {
+  /* Rose Romantic (default) */
+  :root {
+    --color-bg:          #FFF5F7;
+    --color-surface:     #FFFFFF;
+    --color-surface-alt: #FCE7EE;
+    --color-accent:      #D4537E;
+    --color-accent-2:    #E08AA6;
+    --color-text:        #791F1F;
+    --color-text-muted:  #B07A86;
+    --color-on-accent:   #FFFFFF;
+    --color-border:      #F3D6DF;
+  }
+
+  /* Midnight Gold */
+  .theme-midnight-gold {
+    --color-bg:          #1A0E0A;
+    --color-surface:     #2A1A12;
+    --color-surface-alt: #3A2418;
+    --color-accent:      #FAC775;
+    --color-accent-2:    #EF9F27;
+    --color-text:        #F4E9DC;
+    --color-text-muted:  #C9B89E;
+    --color-on-accent:   #1A0E0A;
+    --color-border:      #4A3324;
+  }
+
+  /* Minimal Sky */
+  .theme-minimal-sky {
+    --color-bg:          #F0F4FF;
+    --color-surface:     #FFFFFF;
+    --color-surface-alt: #E4ECFB;
+    --color-accent:      #378ADD;
+    --color-accent-2:    #6FB0E8;
+    --color-text:        #0C447C;
+    --color-text-muted:  #5E78A8;
+    --color-on-accent:   #FFFFFF;
+    --color-border:      #D2DEF2;
+  }
+}
