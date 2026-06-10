@@ -24,6 +24,20 @@ import type { IMilestoneRepository } from '../domain/repositories/IMilestoneRepo
 import type { INotificationRepository } from '../domain/repositories/INotificationRepository';
 import type { ISubscriptionRepository } from '../domain/repositories/ISubscriptionRepository';
 
+// ── Use cases: Onboarding ─────────────────────────────────────────────────────
+import { SaveProfileUseCase } from '../domain/usecases/onboarding/SaveProfileUseCase';
+import { GeneratePairingCodeUseCase } from '../domain/usecases/onboarding/GeneratePairingCodeUseCase';
+import { ConnectPartnerUseCase } from '../domain/usecases/onboarding/ConnectPartnerUseCase';
+import { SaveRelationshipDateUseCase } from '../domain/usecases/onboarding/SaveRelationshipDateUseCase';
+import { CompleteOnboardingUseCase } from '../domain/usecases/onboarding/CompleteOnboardingUseCase';
+
+// ── DataSources: Onboarding ───────────────────────────────────────────────────
+import { HttpOnboardingDataSource } from '../data/datasources/HttpOnboardingDataSource';
+
+// ── Repositories: Onboarding ──────────────────────────────────────────────────
+import { HttpOnboardingRepository } from '../data/repositories/HttpOnboardingRepository';
+import type { IOnboardingRepository } from '../domain/repositories/IOnboardingRepository';
+
 // ── Use cases: Auth ───────────────────────────────────────────────────────────
 import { RegisterUseCase } from '../domain/usecases/auth/RegisterUseCase';
 import { VerifyEmailUseCase } from '../domain/usecases/auth/VerifyEmailUseCase';
@@ -90,6 +104,7 @@ export class DIContainer {
   readonly http: AuthHttpClient;
   readonly session: AuthSessionService;
 
+  private _onboardingRepository?: IOnboardingRepository;
   private _authRepository?: IAuthRepository;
   private _coupleRepository?: ICoupleRepository;
   private _memoryRepository?: IMemoryRepository;
@@ -129,6 +144,13 @@ export class DIContainer {
   }
 
   // ── Repositories ──────────────────────────────────────────────────────────
+
+  getOnboardingRepository(): IOnboardingRepository {
+    this._onboardingRepository ??= new HttpOnboardingRepository(
+      new HttpOnboardingDataSource(this.http),
+    );
+    return this._onboardingRepository;
+  }
 
   getAuthRepository(): IAuthRepository {
     this._authRepository ??= new HttpAuthRepository(new HttpAuthDataSource(this.http));
@@ -222,4 +244,12 @@ export class DIContainer {
   // ── Subscription Use Cases ────────────────────────────────────────────────
 
   getGetSubscriptionUseCase() { return new GetSubscriptionUseCase(this.getSubscriptionRepository()); }
+
+  // ── Onboarding Use Cases ──────────────────────────────────────────────────
+
+  getSaveProfileUseCase() { return new SaveProfileUseCase(this.getOnboardingRepository()); }
+  getGeneratePairingCodeUseCase() { return new GeneratePairingCodeUseCase(this.getOnboardingRepository()); }
+  getConnectPartnerUseCase() { return new ConnectPartnerUseCase(this.getOnboardingRepository()); }
+  getSaveRelationshipDateUseCase() { return new SaveRelationshipDateUseCase(this.getOnboardingRepository()); }
+  getCompleteOnboardingUseCase() { return new CompleteOnboardingUseCase(this.getOnboardingRepository()); }
 }
