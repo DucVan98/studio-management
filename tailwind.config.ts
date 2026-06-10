@@ -2,6 +2,7 @@ import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: ['./app/**/*.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'],
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- nativewind/preset không có ESM types
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
@@ -29,6 +30,9 @@ const config: Config = {
         sans:   ['Inter_400Regular', 'System'],
         medium: ['Inter_500Medium', 'System'],
         bold:   ['Inter_700Bold', 'System'],
+        // Heading serif (Figma dùng serif display). Dùng font hệ thống:
+        // iOS có 'Georgia'; Android fallback generic 'serif'.
+        serif:  ['Georgia', 'serif'],
       },
       fontSize: {
         // Figma text styles
