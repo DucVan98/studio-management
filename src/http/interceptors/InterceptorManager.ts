@@ -1,5 +1,5 @@
 export class InterceptorManager<T> {
-  private readonly handlers: Array<T | undefined> = [];
+  private readonly handlers: (T | undefined)[] = [];
 
   use(handler: T): number {
     this.handlers.push(handler);

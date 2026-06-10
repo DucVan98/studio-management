@@ -40,6 +40,11 @@ export function prepareHeaders(
   data?: unknown,
 ): Record<string, string> {
   const result = { ...headers };
+  // FormData: để fetch tự set multipart boundary — phải xoá Content-Type
+  if (data instanceof FormData) {
+    delete result['Content-Type'];
+    return result;
+  }
   if (data !== undefined && data !== null && !result['Content-Type']) {
     result['Content-Type'] = 'application/json';
   }

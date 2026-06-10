@@ -176,7 +176,8 @@ export class HttpClient {
         | FormData
         | undefined;
 
-      const raw = await fetch(url, { method, headers, body, signal });
+      // Cast: types FormData/AbortSignal của RN khác lib chuẩn nhưng runtime tương thích
+      const raw = await fetch(url, { method, headers, body, signal } as RequestInit);
       clearTimeout(timeoutId);
 
       if (!isSuccessStatus(raw.status)) {

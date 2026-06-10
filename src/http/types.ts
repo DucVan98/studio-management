@@ -58,5 +58,5 @@ export interface AuthInterceptorOptions {
   getToken: () => string | null | Promise<string | null>;
   tokenType?: string;
   headerName?: string;
-  excludeUrls?: Array<string | RegExp>;
+  excludeUrls?: (string | RegExp)[];
 }
