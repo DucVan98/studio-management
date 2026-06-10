@@ -11,6 +11,7 @@ import { useValue } from '@legendapp/state/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { appStore$, appActions } from './src/stores/app.store';
 import { authStore$ } from './src/stores/auth.store';
+import { initPersistence } from './src/stores/persistence/mmkv.adapter';
 import { themeVars } from './src/tokens';
 import { queryClient } from './src/queries';
 import { DIContainer } from './src/di/DIContainer';
@@ -36,6 +37,9 @@ export default function App() {
   useEffect(() => {
     async function bootstrap() {
       try {
+        // 1 tick cho nitro runtime sẵn sàng, rồi mới init MMKV (hydrate stores).
+        await new Promise(resolve => setTimeout(resolve, 0));
+        initPersistence();
         // Khôi phục token từ SecureStore trước khi render navigator
         await DIContainer.getInstance().session.restore();
         appActions.initialize();

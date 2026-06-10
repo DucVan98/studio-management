@@ -22,12 +22,17 @@ export function Input({ label, error, hint, style, ...rest }: InputProps) {
         </Text>
       )}
       <TextInput
+        // Ép một dòng + cuộn ngang, tránh text dài bị wrap rồi khung h-12 cắt mất.
+        multiline={false}
+        numberOfLines={1}
         className={[
           'w-full h-12 px-4 rounded-xl text-body-md text-text bg-surface',
           'border',
           error ? 'border-error' : 'border-border',
+          'focus:border-accent',
         ].join(' ')}
         placeholderTextColor="#B07A86"
+        style={style}
         {...rest}
       />
       {error && (

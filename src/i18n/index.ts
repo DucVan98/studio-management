@@ -1,6 +1,5 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { getLocales } from 'expo-localization';
 import vi from './locales/vi';
 import en from './locales/en';
 
@@ -12,7 +11,10 @@ export const resources = {
 export type TranslationKeys = typeof vi;
 export type SupportedLanguage = keyof typeof resources;
 
-const deviceLanguage = getLocales()[0]?.languageCode ?? 'vi';
+let deviceLanguage = 'vi';
+try {
+  deviceLanguage = Intl.DateTimeFormat().resolvedOptions().locale.split('-')[0] || 'vi';
+} catch { /* Intl không khả dụng */ }
 const lng: SupportedLanguage = deviceLanguage === 'en' ? 'en' : 'vi';
 
 // eslint-disable-next-line import/no-named-as-default-member -- i18next fluent API
