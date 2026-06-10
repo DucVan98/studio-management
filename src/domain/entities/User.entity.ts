@@ -1,21 +1,31 @@
-// ── User Entity ───────────────────────────────────────────────────────────────
-
-export interface UserEntity {
+export interface User {
   id: string;
   email: string;
   name: string;
-  avatar?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  avatarUrl?: string;
+  partnerNickname?: string;
+  oauthProvider?: string;
+  emailVerified: boolean;
+  /** Rỗng/undefined khi chưa link partner — route cần couple sẽ trả 403 */
+  coupleId?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export function createUserEntity(raw: Record<string, unknown>): UserEntity {
-  return {
-    id: String(raw['id']),
-    email: String(raw['email']),
-    name: String(raw['name']),
-    avatar: raw['avatar'] as string | undefined,
-    createdAt: raw['createdAt'] ? new Date(raw['createdAt'] as string) : new Date(),
-    updatedAt: raw['updatedAt'] ? new Date(raw['updatedAt'] as string) : new Date(),
-  };
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+  /** RFC3339 — dùng để chủ động refresh trước khi hết hạn */
+  expiresAt: string;
+}
+
+/** Kết quả của login / verify-email / refresh (TokenPair của backend). */
+export interface AuthSession {
+  user: User;
+  tokens: AuthTokens;
+}
+
+export interface RegistrationResult {
+  userId: string;
+  message: string;
 }
