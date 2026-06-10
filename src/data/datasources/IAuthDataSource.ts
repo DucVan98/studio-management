@@ -1,21 +1,18 @@
-import type { LoginCredentials, AuthTokens } from '../../domain/repositories/IAuthRepository';
-
-export interface AuthLoginResponse {
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    avatar?: string;
-    created_at: string;
-    updated_at: string;
-  };
-  access_token: string;
-  refresh_token?: string;
-}
+import type {
+  ForgotPasswordResponseDto,
+  RegisterRequestDto,
+  RegisterResponseDto,
+  ResetPasswordRequestDto,
+  TokenPairDto,
+  VerifyEmailRequestDto,
+} from '../types/api.types';
 
 export interface IAuthDataSource {
-  login(credentials: LoginCredentials): Promise<AuthLoginResponse>;
-  logout(): Promise<void>;
-  refreshToken(token: string): Promise<{ access_token: string; refresh_token?: string }>;
-  getProfile(): Promise<AuthLoginResponse['user']>;
+  register(body: RegisterRequestDto): Promise<RegisterResponseDto>;
+  verifyEmail(body: VerifyEmailRequestDto): Promise<TokenPairDto>;
+  login(email: string, password: string): Promise<TokenPairDto>;
+  refresh(refreshToken: string): Promise<TokenPairDto>;
+  forgotPassword(email: string): Promise<ForgotPasswordResponseDto>;
+  resetPassword(body: ResetPasswordRequestDto): Promise<void>;
+  logout(refreshToken: string): Promise<void>;
 }

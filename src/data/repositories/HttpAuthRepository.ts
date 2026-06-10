@@ -1,42 +1,64 @@
 import type { IAuthDataSource } from '../datasources/IAuthDataSource';
 import type {
   IAuthRepository,
-  LoginCredentials,
-  AuthTokens,
+  LoginParams,
+  RegisterParams,
+  ResetPasswordParams,
+  VerifyEmailParams,
 } from '../../domain/repositories/IAuthRepository';
-import type { UserEntity } from '../../domain/entities/User.entity';
-import { mapUserFromApi } from '../mappers/UserMapper';
+import type { AuthSession, RegistrationResult } from '../../domain/entities';
+import { mapAuthSession } from '../mappers/UserMapper';
+import { guard } from '../mappers/ErrorMapper';
 
 export class HttpAuthRepository implements IAuthRepository {
   constructor(private readonly dataSource: IAuthDataSource) {}
 
-  async login(
-    credentials: LoginCredentials,
-  ): Promise<{ user: UserEntity; tokens: AuthTokens }> {
-    const response = await this.dataSource.login(credentials);
-    return {
-      user: mapUserFromApi(response.user),
-      tokens: {
-        accessToken: response.access_token,
-        refreshToken: response.refresh_token,
-      },
-    };
+  register(params: RegisterParams): Promise<RegistrationResult> {
+    return guard(async () => {
+      const dto = await this.dataSource.register({
+        email: params.email,
+        password: params.password,
+        name: params.name,
+      });
+      return { userId: dto.user_id, message: dto.message };
+    });
   }
 
-  async logout(): Promise<void> {
-    return this.dataSource.logout();
+  verifyEmail(params: VerifyEmailParams): Promise<AuthSession> {
+    return guard(async () =>
+      mapAuthSession(
+        await this.dataSource.verifyEmail({ user_id: params.userId, code: params.code }),
+      ),
+    );
   }
 
-  async refreshToken(token: string): Promise<AuthTokens> {
-    const response = await this.dataSource.refreshToken(token);
-    return {
-      accessToken: response.access_token,
-      refreshToken: response.refresh_token,
-    };
+  login(params: LoginParams): Promise<AuthSession> {
+    return guard(async () =>
+      mapAuthSession(await this.dataSource.login(params.email, params.password)),
+    );
   }
 
-  async getProfile(): Promise<UserEntity> {
-    const raw = await this.dataSource.getProfile();
-    return mapUserFromApi(raw);
+  refresh(refreshToken: string): Promise<AuthSession> {
+    return guard(async () => mapAuthSession(await this.dataSource.refresh(refreshToken)));
+  }
+
+  forgotPassword(email: string): Promise<void> {
+    return guard(async () => {
+      await this.dataSource.forgotPassword(email);
+    });
+  }
+
+  resetPassword(params: ResetPasswordParams): Promise<void> {
+    return guard(() =>
+      this.dataSource.resetPassword({
+        user_id: params.userId,
+        code: params.code,
+        new_password: params.newPassword,
+      }),
+    );
+  }
+
+  logout(refreshToken: string): Promise<void> {
+    return guard(() => this.dataSource.logout(refreshToken));
   }
 }
