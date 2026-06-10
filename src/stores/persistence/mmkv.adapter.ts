@@ -1,27 +1,28 @@
 import { MMKV } from 'react-native-mmkv';
-import { configureObservablePersistence, persistObservable } from '@legendapp/state/persist';
+import type { ObservableParam } from '@legendapp/state';
+import { syncObservable } from '@legendapp/state/sync';
 import { ObservablePersistMMKV } from '@legendapp/state/persist-plugins/mmkv';
-import type { Observable } from '@legendapp/state';
 
 // ── Global MMKV instance ──────────────────────────────────────────────────────
 export const storage = new MMKV({ id: 'app-storage' });
 
-// ── Configure Legend State global persistence ─────────────────────────────────
-configureObservablePersistence({
-  pluginLocal: ObservablePersistMMKV,
-});
+// Plugin dùng chung — Legend-State v3 sync API
+const mmkvPlugin = new ObservablePersistMMKV({ id: 'app-storage' });
 
 /**
- * Persist a Legend State observable to MMKV.
+ * Persist một Legend-State observable vào MMKV (Legend-State v3).
  *
  * @example
  * configurePersistence(authStore$, 'auth');
  */
-export function configurePersistence<T extends object>(
-  observable: Observable<T>,
+export function configurePersistence<T>(
+  observable$: ObservableParam<T>,
   key: string,
 ): void {
-  persistObservable(observable, {
-    local: key,
+  syncObservable(observable$, {
+    persist: {
+      name: key,
+      plugin: mmkvPlugin,
+    },
   });
 }

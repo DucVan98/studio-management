@@ -15,6 +15,7 @@ export type SupportedLanguage = keyof typeof resources;
 const deviceLanguage = getLocales()[0]?.languageCode ?? 'vi';
 const lng: SupportedLanguage = deviceLanguage === 'en' ? 'en' : 'vi';
 
+// eslint-disable-next-line import/no-named-as-default-member -- i18next fluent API
 i18n
   .use(initReactI18next)
   .init({

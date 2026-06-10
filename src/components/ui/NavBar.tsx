@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
 
@@ -40,9 +41,9 @@ interface NavBarProps {
   onTabPress?: (tab: TabKey) => void;
   /** Called when center FAB is pressed */
   onFabPress?: () => void;
-  // Expo Router BottomTabBarProps shape (optional wiring)
-  state?: { index: number; routes: { name: string }[] };
-  navigation?: { emit: (e: { type: string; target?: string; canPreventDefault?: boolean }) => { defaultPrevented: boolean }; navigate: (name: string) => void };
+  // Expo Router BottomTabBarProps (optional wiring)
+  state?: BottomTabBarProps['state'];
+  navigation?: BottomTabBarProps['navigation'];
 }
 
 const FAB_SIZE  = 64;
@@ -61,7 +62,7 @@ export function NavBar({ activeTab, onTabPress, onFabPress, state, navigation }:
   const handleTabPress = (tab: TabKey, routeIndex?: number) => {
     if (navigation && state && routeIndex !== undefined) {
       const route = state.routes[routeIndex];
-      const event = navigation.emit({ type: 'tabPress', target: route?.name, canPreventDefault: true });
+      const event = navigation.emit({ type: 'tabPress', target: route?.key, canPreventDefault: true });
       if (!event.defaultPrevented) navigation.navigate(route?.name ?? tab);
     }
     onTabPress?.(tab);

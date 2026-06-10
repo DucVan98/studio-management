@@ -17,25 +17,24 @@ export function Input({ label, error, hint, style, ...rest }: InputProps) {
   return (
     <View className="gap-1.5">
       {label && (
-        <Text className="text-body-sm font-medium text-secondary-700">
+        <Text className="text-body-sm font-medium text-text">
           {label}
         </Text>
       )}
       <TextInput
         className={[
-          'w-full h-12 px-4 rounded-xl text-body-md text-secondary-900 bg-surface',
+          'w-full h-12 px-4 rounded-xl text-body-md text-text bg-surface',
           'border',
-          error ? 'border-error' : 'border-secondary-200',
-          'focus:border-primary-400',
+          error ? 'border-error' : 'border-border',
         ].join(' ')}
-        placeholderTextColor="#94a3b8"
+        placeholderTextColor="#B07A86"
         {...rest}
       />
       {error && (
         <Text className="text-body-sm text-error">{error}</Text>
       )}
       {hint && !error && (
-        <Text className="text-body-sm text-secondary-400">{hint}</Text>
+        <Text className="text-body-sm text-text-muted">{hint}</Text>
       )}
     </View>
   );
