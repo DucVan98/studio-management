@@ -25,7 +25,7 @@ export type RootStackParamList = {
 
 // Cho phép useNavigation()/useRoute() suy luận type mà không cần generic thủ công.
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
+   
   namespace ReactNavigation {
     interface RootParamList extends RootStackParamList {}
   }

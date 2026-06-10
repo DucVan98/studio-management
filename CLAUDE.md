@@ -74,6 +74,17 @@ Luật bắt buộc:
 - TypeScript `strict` — không dùng `any`; ưu tiên `unknown` + type guard. Import type dùng `import type`.
 - Mọi chuỗi hiển thị phải có ở CẢ `src/i18n/locales/en.ts` và `vi.ts`.
 - Sau khi sửa code: chạy `pnpm typecheck` và `pnpm lint`. (Hook tự chạy, nhưng vẫn kiểm tra kết quả.)
+
+### ESLint tự động chặn (xem `eslint.config.js`)
+
+Một phần luật đã được máy enforce, vi phạm sẽ **fail lint** ngay:
+
+- **Luật phụ thuộc layer** qua `import/no-restricted-paths`: `domain` không import được `data/http/queries/stores/screens/...`; `data` không import được presentation. Usecase không import được impl `Http*Repository`.
+- `@typescript-eslint/no-explicit-any` = error (miễn trừ `src/stores/persistence/**`).
+- `@typescript-eslint/consistent-type-imports` = error (autofix — hook tự sửa).
+- `eqeqeq`; cảnh báo `max-lines-per-function`/`max-params`/`complexity` để nhắc SRP (không chặn build).
+
+Những gì máy KHÔNG bắt được (SOLID sâu, đặt tên, trừu tượng hoá, i18n đủ 2 ngôn ngữ) → dùng subagent `architecture-guard` hoặc lệnh `/review-arch`.
 - Hiện chưa có test — khi thêm logic vào usecase, viết unit test cho usecase đó (`*.test.ts`, mock repository interface).
 - API contract đầy đủ ở `everly-api-spec.md` — tham chiếu file này khi thêm endpoint.
 
