@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { View, Animated } from 'react-native';
 
 /**
@@ -20,7 +20,7 @@ interface SkeletonProps {
 }
 
 function SkeletonBase({ width, height, radius = 8, className = '' }: SkeletonProps) {
-  const opacity = useRef(new Animated.Value(0.4)).current;
+  const opacity = useMemo(() => new Animated.Value(0.4), []);
 
   useEffect(() => {
     const anim = Animated.loop(

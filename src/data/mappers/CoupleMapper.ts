@@ -40,7 +40,8 @@ export function mapCoupleStats(dto: CoupleStatsDto): CoupleStats {
 /** payload là base64 của JSONB bytes — decode best-effort. */
 function decodePayload(payload: string): Record<string, unknown> | null {
   try {
-    return JSON.parse(globalThis.atob(payload)) as Record<string, unknown>;
+    const atob = (globalThis as unknown as { atob: (s: string) => string }).atob;
+    return JSON.parse(atob(payload)) as Record<string, unknown>;
   } catch {
     return null;
   }

@@ -18,6 +18,7 @@ export function PartnerAcceptScreen() {
   const [startDate, setStartDate] = useState<string | null>(null);
   const inviter = inviterName ?? 'Người ấy';
 
+  const [daysTogether, setDaysTogether] = useState<number | null>(null);
   useEffect(() => {
     if (!code) return;
     let active = true;
@@ -25,18 +26,20 @@ export function PartnerAcceptScreen() {
       .getGetInviteUseCase()
       .execute(code)
       .then((invite) => {
-        // CoupleInvite chưa kèm ngày bắt đầu → tạm dùng ngày tạo invite.
-        if (active) setStartDate(invite.createdAt.slice(0, 10));
+        if (active) {
+          const date = invite.createdAt.slice(0, 10);
+          setStartDate(date);
+          // Date.now() trong async callback — không phải render, hợp lệ
+          setDaysTogether(Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 86_400_000)));
+        }
       })
-      .catch(() => active && setStartDate(null));
+      .catch(() => {
+        if (active) { setStartDate(null); setDaysTogether(null); }
+      });
     return () => {
       active = false;
     };
   }, [code]);
-
-  const daysTogether = startDate
-    ? Math.max(0, Math.floor((Date.now() - new Date(startDate).getTime()) / 86_400_000))
-    : null;
 
   const handleAccept = async () => {
     if (!code) {

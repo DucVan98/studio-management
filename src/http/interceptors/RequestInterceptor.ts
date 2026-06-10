@@ -13,7 +13,7 @@ export function createRequestIdInterceptor(
   headerName = 'X-Request-ID',
 ): RequestInterceptorFn {
   return (config: RequestConfig): RequestConfig => {
-    const requestId = crypto.randomUUID();
+    const requestId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
     return {
       ...config,
       headers: { ...config.headers, [headerName]: requestId },

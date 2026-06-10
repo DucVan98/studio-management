@@ -38,7 +38,7 @@ export default function App() {
     async function bootstrap() {
       try {
         // 1 tick cho nitro runtime sẵn sàng, rồi mới init MMKV (hydrate stores).
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise<void>(resolve => setTimeout(() => resolve(), 0));
         initPersistence();
         // Khôi phục token từ SecureStore trước khi render navigator
         await DIContainer.getInstance().session.restore();

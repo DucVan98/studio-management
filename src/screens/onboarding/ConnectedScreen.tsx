@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View, Text } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -23,9 +24,10 @@ export function ConnectedScreen() {
   const me = user?.name ?? 'Bạn';
   const partner = partnerName ?? 'Nửa kia';
 
-  const days = startDate
-    ? Math.max(0, Math.floor((Date.now() - new Date(startDate).getTime()) / 86_400_000))
-    : 0;
+  const [days] = useState(() => {
+    if (!startDate) return 0;
+    return Math.max(0, Math.floor((Date.now() - new Date(startDate).getTime()) / 86_400_000));
+  });
 
   return (
     <OnboardingScreen>

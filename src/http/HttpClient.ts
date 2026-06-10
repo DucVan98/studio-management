@@ -60,8 +60,8 @@ async function parseResponse<T>(
 function mergeAbortSignals(...signals: AbortSignal[]): AbortSignal {
   const controller = new AbortController();
   for (const signal of signals) {
-    if (signal.aborted) { controller.abort(signal.reason); break; }
-    signal.addEventListener('abort', () => controller.abort(signal.reason));
+    if (signal.aborted) { controller.abort(); break; }
+    signal.addEventListener('abort', () => controller.abort());
   }
   return controller.signal;
 }
