@@ -3,20 +3,20 @@ import './src/i18n';
 
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
 import type { LinkingOptions } from '@react-navigation/native';
 import { useValue } from '@legendapp/state/react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { appStore$, appActions } from './src/stores/app.store';
-import { authStore$ } from './src/stores/auth.store';
-import { initPersistence } from './src/stores/persistence/mmkv.adapter';
-import { themeVars } from './src/tokens';
-import { queryClient } from './src/queries';
-import { DIContainer } from './src/di/DIContainer';
+import { appStore$, appActions } from '@/stores';
+import { initPersistence } from '@/stores/persistence/mmkv.adapter.ts';
+import { themeVars } from '@/tokens';
+import { queryClient } from '@/queries';
+import { DIContainer } from '@/di/DIContainer.ts';
 import { RootNavigator } from './src/navigation/RootNavigator';
-import type { RootStackParamList } from './src/navigation/types';
+import type { RootStackParamList } from '@/navigation/types.ts';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -29,23 +29,32 @@ const linking: LinkingOptions<RootStackParamList> = {
   },
 };
 
+// RN 0.85 + New Architecture: SecureStore.getItemAsync() đôi khi không resolve
+// trong bridgeless mode → bootstrap treo vô thời hạn → splash screen không ẩn.
+const withBootTimeout = (promise: Promise<unknown>): Promise<unknown> =>
+  Promise.race([promise, new Promise<void>(resolve => setTimeout(resolve, 5000))]);
+
 export default function App() {
   const theme = useValue(appStore$.theme);
-  const user = useValue(authStore$.user);
   const [booted, setBooted] = useState(false);
+  // Dùng SecureStore (session) thay vì authStore$.user (MMKV) để định tuyến —
+  // session.restore() là nguồn đúng cho trạng thái auth khi khởi động.
+  const [sessionAuthenticated, setSessionAuthenticated] = useState(false);
 
   useEffect(() => {
     async function bootstrap() {
       try {
-        // 1 tick cho nitro runtime sẵn sàng, rồi mới init MMKV (hydrate stores).
-        await new Promise<void>(resolve => setTimeout(() => resolve(), 0));
+        // Đợi Nitro runtime sẵn sàng trước khi init MMKV HybridObject.
+        await new Promise<void>(resolve => setTimeout(resolve, 50));
         initPersistence();
-        // Khôi phục token từ SecureStore trước khi render navigator
-        await DIContainer.getInstance().session.restore();
+        const tokens = await withBootTimeout(DIContainer.getInstance().session.restore());
+        setSessionAuthenticated(tokens !== null);
         appActions.initialize();
+      } catch {
+        // tiếp tục với unauthenticated state
       } finally {
         setBooted(true);
-        SplashScreen.hideAsync();
+        await SplashScreen.hideAsync();
       }
     }
     bootstrap();
@@ -58,17 +67,19 @@ export default function App() {
     });
   }, []);
 
-  if (!booted) return null; // splash vẫn hiển thị
+  if (!booted) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {/* themeVars inject CSS variables cho toàn bộ cây component */}
-      <View style={[{ flex: 1 }, themeVars[theme]]}>
-        <StatusBar style={theme === 'midnight-gold' ? 'light' : 'dark'} />
-        <NavigationContainer linking={linking}>
-          <RootNavigator initialRouteName={user ? 'App' : 'Welcome'} />
-        </NavigationContainer>
-      </View>
-    </QueryClientProvider>
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        {/* themeVars inject CSS variables cho toàn bộ cây component */}
+        <View style={[{ flex: 1 }, themeVars[theme]]}>
+          <StatusBar style={theme === 'midnight-gold' ? 'light' : 'dark'} />
+          <NavigationContainer linking={linking}>
+            <RootNavigator initialRouteName={sessionAuthenticated ? 'App' : 'Welcome'} />
+          </NavigationContainer>
+        </View>
+      </QueryClientProvider>
+    </SafeAreaProvider>
   );
 }
