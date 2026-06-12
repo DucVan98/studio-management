@@ -40,7 +40,8 @@ export function RegisterScreen() {
     try {
       const registerUseCase = DIContainer.getInstance().getRegisterUseCase();
       // Tên hiển thị được nhập ở bước "Thiết lập hồ sơ"; tạm dùng phần trước @.
-      const name = email.split('@')[0] || 'Bạn';
+      // slice(0, 50): local part email có thể dài hơn giới hạn 50 ký tự của name.
+      const name = (email.trim().split('@')[0] || 'Bạn').slice(0, 50);
       const { userId } = await registerUseCase.execute({ name, email, password });
 
       // Đăng ký KHÔNG trả token — chuyển sang nhập OTP để xác thực email.

@@ -5,6 +5,7 @@ import type {
 } from '../../repositories/IAuthRepository';
 import type { RegistrationResult } from '../../entities';
 import { AppError } from '../../errors/AppError';
+import { validateEmail } from './validateEmail';
 
 /**
  * Đăng ký — KHÔNG trả token. Sau bước này user phải nhập OTP
@@ -14,6 +15,7 @@ export class RegisterUseCase implements UseCase<RegisterParams, RegistrationResu
   constructor(private readonly authRepository: IAuthRepository) {}
 
   execute(params: RegisterParams): Promise<RegistrationResult> {
+    const email = validateEmail(params.email);
     if (params.password.length < 8 || params.password.length > 72) {
       throw new AppError('Password must be 8–72 characters', 'validation');
     }
@@ -21,6 +23,6 @@ export class RegisterUseCase implements UseCase<RegisterParams, RegistrationResu
     if (name.length < 1 || name.length > 50) {
       throw new AppError('Name must be 1–50 characters', 'validation');
     }
-    return this.authRepository.register({ ...params, name });
+    return this.authRepository.register({ ...params, name, email });
   }
 }
