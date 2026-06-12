@@ -39,11 +39,7 @@ Luật từ spec v1.0.0:
   - footer `BREAKING CHANGE: <mô tả>` (viết hoa, theo sau là `: `)
 - **footer**: format `Token: value` hoặc `Token #value`; token dùng `-` thay space (vd `Reviewed-by`), ngoại lệ duy nhất là `BREAKING CHANGE`. Refs issue dạng `Refs: #123`.
 
-Luôn kết thúc message bằng footer:
-
-```
-Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
-```
+KHÔNG thêm footer ký tên Claude (`Co-Authored-By: Claude ...`) hay bất kỳ chữ ký AI nào vào commit message.
 
 ## Ví dụ đúng
 
