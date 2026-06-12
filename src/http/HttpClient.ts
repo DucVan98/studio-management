@@ -159,11 +159,27 @@ export class HttpClient {
     const url = buildRequestUrl(config);
     const method = config.method ?? 'GET';
 
+    // Fail-fast: URL không tuyệt đối (thường do thiếu EXPO_PUBLIC_API_URL)
+    // → fetch trên iOS có thể treo vô hạn thay vì reject. Ném lỗi ngay.
+    if (!/^https?:\/\//i.test(url)) {
+      throw createHttpError(
+        new Error(`Invalid request URL "${url}" — kiểm tra EXPO_PUBLIC_API_URL trong .env`),
+        config,
+      );
+    }
+
+    const timeoutMs = config.timeout ?? this.timeout;
     const controller = new AbortController();
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      config.timeout ?? this.timeout,
-    );
+    // Timeout 2 lớp: abort fetch + reject cứng qua Promise.race
+    // (phòng trường hợp native fetch không phản hồi AbortSignal).
+    let raceTimerId: ReturnType<typeof setTimeout> | undefined;
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const hardTimeout = new Promise<never>((_, reject) => {
+      raceTimerId = setTimeout(
+        () => reject(createHttpError(new Error(`Request timeout after ${timeoutMs}ms`), config)),
+        timeoutMs + 1_000,
+      );
+    });
 
     const signal = config.signal
       ? mergeAbortSignals(config.signal, controller.signal)
@@ -177,7 +193,10 @@ export class HttpClient {
         | undefined;
 
       // Cast: types FormData/AbortSignal của RN khác lib chuẩn nhưng runtime tương thích
-      const raw = await fetch(url, { method, headers, body, signal } as RequestInit);
+      const raw = await Promise.race([
+        fetch(url, { method, headers, body, signal } as RequestInit),
+        hardTimeout,
+      ]);
       clearTimeout(timeoutId);
 
       if (!isSuccessStatus(raw.status)) {
@@ -189,11 +208,13 @@ export class HttpClient {
       clearTimeout(timeoutId);
       if (error instanceof Error && error.name === 'AbortError') {
         throw createHttpError(
-          new Error(`Request timeout after ${config.timeout}ms`),
+          new Error(`Request timeout after ${timeoutMs}ms`),
           config,
         );
       }
       throw error;
+    } finally {
+      if (raceTimerId !== undefined) clearTimeout(raceTimerId);
     }
   }
 
