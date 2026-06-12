@@ -24,9 +24,11 @@ export function Input({ label, error, hint, style, ...rest }: InputProps) {
       <TextInput
         // Ép một dòng + cuộn ngang, tránh text dài bị wrap rồi khung h-12 cắt mất.
         multiline={false}
-        numberOfLines={1}
+        // text-body-input (không lineHeight) thay vì text-body-md: TextInput +
+        // lineHeight trên Fabric bị bug wrap như multiline và lệch căn giữa dọc.
+        // py-0 + align-middle để text căn giữa dọc cả Android.
         className={[
-          'w-full h-12 px-4 rounded-xl text-body-md text-text bg-surface',
+          'w-full h-12 px-4 py-0 rounded-xl text-body-input text-text bg-surface align-middle',
           'border',
           error ? 'border-error' : 'border-border',
           'focus:border-accent',

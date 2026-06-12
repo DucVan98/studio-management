@@ -43,6 +43,9 @@ const config: Config = {
         'heading-md': ['18px', { lineHeight: '24px' }],
         'body-lg':    ['16px', { lineHeight: '24px' }],
         'body-md':    ['14px', { lineHeight: '20px' }],
+        // Riêng cho TextInput: KHÔNG có lineHeight — Fabric bug khiến
+        // TextInput + lineHeight wrap như multiline và lệch căn giữa dọc.
+        'body-input': '14px',
         'body-sm':    ['12px', { lineHeight: '16px' }],
         'label':      ['11px', { lineHeight: '14px', letterSpacing: '0.5px' }],
       },
