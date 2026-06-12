@@ -22,3 +22,6 @@ web-build/
 
 *storybook.log
 storybook-static
+
+# Claude Code: cấu hình cá nhân theo máy
+.claude/settings.local.json
