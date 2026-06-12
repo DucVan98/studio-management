@@ -15,6 +15,8 @@ pnpm test           # jest (jest-expo)
 
 > Dùng `pnpm` (KHÔNG dùng npm/yarn). Đây là pnpm workspace.
 
+Khi commit: dùng skill `/commit` — message theo Conventional Commits v1.0.0, mô tả tiếng Việt.
+
 ## Tech stack
 
 - **State server**: TanStack Query v5 (qua `src/queries/`)
@@ -47,6 +49,28 @@ Luật bắt buộc:
 3. UI **không gọi datasource/HTTP trực tiếp**. Luồng đúng: `screen → query hook → usecase → repository(interface) → datasource → HttpClient`.
 4. Lỗi ném ra ngoài domain phải là `AppError` (`src/domain/errors/AppError.ts`), không để lộ lỗi HTTP thô. Mapping HTTP→AppError nằm ở tầng data/http.
 5. Mọi dependency mới phải đăng ký trong `DIContainer.ts` và expose qua getter `getXxxUseCase()`.
+6. **Thư viện bên thứ 3 phải được bọc qua adapter/service riêng** — xem mục dưới.
+
+## Bọc thư viện bên thứ 3 (BẮT BUỘC)
+
+Mục tiêu: khi cần đổi sang thư viện khác, chỉ sửa **một file adapter**, không phải sửa rải rác khắp codebase.
+
+Luật:
+
+1. **KHÔNG import trực tiếp** thư viện bên thứ 3 (storage, analytics, notifications, image picker, camera, IAP, crash reporting, date lib…) trong screen, component, usecase, store hay query hook.
+2. Mỗi thư viện phải có **một module/service bọc lại** trong `src/services/` (hoặc `src/http/`, `src/stores/persistence/` tuỳ loại):
+   - Định nghĩa **interface riêng của app** (vd `ISecureStorage`, `IAnalytics`) — API đặt theo nhu cầu của app, KHÔNG sao chép nguyên API của thư viện.
+   - Impl gọi thư viện thật, đặt tên theo thư viện (vd `ExpoSecureTokenStorage`, `MMKVStorageAdapter`) — đây là **file duy nhất** được import thư viện đó.
+   - Đăng ký qua `DIContainer.ts` (hoặc export instance từ service module); nơi dùng chỉ phụ thuộc interface.
+3. Lỗi của thư viện không được lọt ra ngoài adapter ở dạng thô — map sang `AppError` hoặc kiểu lỗi của app.
+
+Ví dụ đã có sẵn trong repo — làm theo các file này:
+
+- `src/http/HttpClient.ts` — bọc fetch, cấm dùng axios/fetch trực tiếp.
+- `src/services/SecureTokenStorage.ts` — bọc expo-secure-store.
+- `src/services/mmkv.adapter.ts`, `src/stores/persistence/` — bọc MMKV.
+
+Ngoại lệ (KHÔNG cần bọc): React/React Native core, Expo runtime cơ bản, React Navigation, NativeWind, TanStack Query, Legend-State, i18next — đây là framework/nền tảng của app, đã được quy ước cách dùng ở các mục khác. Khi phân vân, hỏi lại trước khi import trực tiếp.
 
 ## Convention theo từng tầng
 
