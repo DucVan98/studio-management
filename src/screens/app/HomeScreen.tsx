@@ -5,8 +5,35 @@ import { useValue } from '@legendapp/state/react';
 import { authStore$ } from '../../stores/auth.store';
 
 export function HomeScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const user = useValue(authStore$.user);
+  // Locale của date phải khớp ngôn ngữ i18n đang dùng (tránh trộn EN/VI)
+  const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+
+  // Mock data – replace với real data từ store/API
+  const quickActions = [
+    {
+      id: '1',
+      icon: '📊',
+      title: t('home.quickActions.overview'),
+      subtitle: t('home.quickActions.overviewSubtitle'),
+      bg: '#FCE7EE',
+    },
+    {
+      id: '2',
+      icon: '📝',
+      title: t('home.quickActions.tasks'),
+      subtitle: t('home.quickActions.tasksSubtitle', { count: 3 }),
+      bg: '#FCE7EE',
+    },
+    {
+      id: '3',
+      icon: '🔔',
+      title: t('home.quickActions.notifications'),
+      subtitle: t('home.quickActions.notificationsSubtitle', { count: 2 }),
+      bg: '#FCE7EE',
+    },
+  ];
 
   return (
     <SafeAreaView className="flex-1 bg-bg">
@@ -14,14 +41,14 @@ export function HomeScreen() {
         {/* Header */}
         <View className="mb-8">
           <Text className="text-body-sm text-text-muted font-medium">
-            {new Date().toLocaleDateString('vi-VN', {
+            {new Date().toLocaleDateString(dateLocale, {
               weekday: 'long',
               day: 'numeric',
               month: 'long',
             })}
           </Text>
           <Text className="text-heading-xl font-bold text-text mt-1">
-            {t('home.welcome', { name: user?.name ?? 'Bạn' })}
+            {t('home.welcome', { name: user?.name ?? t('home.defaultName') })}
           </Text>
           <Text className="text-body-md text-text-muted mt-1">
             {t('home.greeting')}
@@ -30,7 +57,7 @@ export function HomeScreen() {
 
         {/* Quick action cards – placeholder để map từ Figma */}
         <View className="gap-4">
-          {QUICK_ACTIONS.map((action) => (
+          {quickActions.map(action => (
             <TouchableOpacity
               key={action.id}
               activeOpacity={0.8}
@@ -60,10 +87,3 @@ export function HomeScreen() {
     </SafeAreaView>
   );
 }
-
-// ── Mock data – replace với real data từ store/API ────────────────────────────
-const QUICK_ACTIONS = [
-  { id: '1', icon: '📊', title: 'Tổng quan', subtitle: 'Xem số liệu hôm nay', bg: '#FCE7EE' },
-  { id: '2', icon: '📝', title: 'Tác vụ', subtitle: '3 việc cần hoàn thành', bg: '#FCE7EE' },
-  { id: '3', icon: '🔔', title: 'Thông báo', subtitle: '2 thông báo mới', bg: '#FCE7EE' },
-];

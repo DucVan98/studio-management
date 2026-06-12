@@ -10,6 +10,7 @@ export default {
     error: 'Có lỗi xảy ra',
     retry: 'Thử lại',
     success: 'Thành công',
+    comingSoon: 'Sắp ra mắt',
   },
   auth: {
     login: 'Đăng nhập',
@@ -31,10 +32,25 @@ export default {
     loginSuccess: 'Đăng nhập thành công!',
     loginError: 'Email hoặc mật khẩu không đúng',
   },
+  tabs: {
+    home: 'Trang chủ',
+    memories: 'Ký ức',
+    explore: 'Khám phá',
+    profile: 'Hồ sơ',
+  },
   home: {
     title: 'Trang chủ',
     welcome: 'Xin chào, {{name}}!',
     greeting: 'Hôm nay bạn muốn làm gì?',
+    defaultName: 'Bạn',
+    quickActions: {
+      overview: 'Tổng quan',
+      overviewSubtitle: 'Xem số liệu hôm nay',
+      tasks: 'Tác vụ',
+      tasksSubtitle: '{{count}} việc cần hoàn thành',
+      notifications: 'Thông báo',
+      notificationsSubtitle: '{{count}} thông báo mới',
+    },
   },
   profile: {
     title: 'Hồ sơ',
@@ -42,6 +58,8 @@ export default {
     settings: 'Cài đặt',
     language: 'Ngôn ngữ',
     theme: 'Giao diện',
+    notifications: 'Thông báo',
+    about: 'Về ứng dụng',
     logoutConfirm: 'Bạn có chắc muốn đăng xuất?',
   },
   settings: {

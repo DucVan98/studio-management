@@ -10,6 +10,14 @@ export function AppProfileScreen() {
   const navigation = useNavigation();
   const user = useValue(authStore$.user);
 
+  const menuItems = [
+    { id: '1', icon: '✏️', label: t('profile.editProfile') },
+    { id: '2', icon: '🔔', label: t('profile.notifications') },
+    { id: '3', icon: '🌐', label: t('profile.language') },
+    { id: '4', icon: '🎨', label: t('profile.theme') },
+    { id: '5', icon: 'ℹ️', label: t('profile.about') },
+  ];
+
   const handleLogout = () => {
     Alert.alert(t('auth.logout'), t('profile.logoutConfirm'), [
       { text: t('common.cancel'), style: 'cancel' },
@@ -44,12 +52,12 @@ export function AppProfileScreen() {
 
         {/* Menu items */}
         <View className="bg-surface rounded-2xl overflow-hidden shadow-sm">
-          {MENU_ITEMS.map((item, index) => (
+          {menuItems.map((item, index) => (
             <TouchableOpacity
               key={item.id}
               activeOpacity={0.7}
               className={`flex-row items-center px-5 py-4 gap-4 ${
-                index < MENU_ITEMS.length - 1 ? 'border-b border-border' : ''
+                index < menuItems.length - 1 ? 'border-b border-border' : ''
               }`}
             >
               <Text className="text-2xl">{item.icon}</Text>
@@ -74,10 +82,3 @@ export function AppProfileScreen() {
   );
 }
 
-const MENU_ITEMS = [
-  { id: '1', icon: '✏️', label: 'Chỉnh sửa hồ sơ' },
-  { id: '2', icon: '🔔', label: 'Thông báo' },
-  { id: '3', icon: '🌐', label: 'Ngôn ngữ' },
-  { id: '4', icon: '🎨', label: 'Giao diện' },
-  { id: '5', icon: 'ℹ️', label: 'Về ứng dụng' },
-];

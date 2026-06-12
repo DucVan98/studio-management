@@ -10,6 +10,7 @@ export default {
     error: 'Something went wrong',
     retry: 'Retry',
     success: 'Success',
+    comingSoon: 'Coming soon',
   },
   auth: {
     login: 'Login',
@@ -31,10 +32,25 @@ export default {
     loginSuccess: 'Logged in successfully!',
     loginError: 'Invalid email or password',
   },
+  tabs: {
+    home: 'Home',
+    memories: 'Memories',
+    explore: 'Explore',
+    profile: 'Profile',
+  },
   home: {
     title: 'Home',
     welcome: 'Hello, {{name}}!',
     greeting: 'What would you like to do today?',
+    defaultName: 'there',
+    quickActions: {
+      overview: 'Overview',
+      overviewSubtitle: "View today's stats",
+      tasks: 'Tasks',
+      tasksSubtitle: '{{count}} tasks to complete',
+      notifications: 'Notifications',
+      notificationsSubtitle: '{{count}} new notifications',
+    },
   },
   profile: {
     title: 'Profile',
@@ -42,6 +58,8 @@ export default {
     settings: 'Settings',
     language: 'Language',
     theme: 'Theme',
+    notifications: 'Notifications',
+    about: 'About',
     logoutConfirm: 'Are you sure you want to logout?',
   },
   settings: {
