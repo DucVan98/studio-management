@@ -1,18 +1,28 @@
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
+import { useThemeColors } from '../../tokens/useThemeColors';
+import {
+  NavBarBackdrop,
+  BAR_HEIGHT,
+  BAR_MARGIN_X,
+  FAB_LIFT,
+  FAB_SIZE,
+  GLOW_BLEED,
+  NAV_OVERHANG,
+} from './NavBarBackdrop';
 
 /**
- * Figma NavBar component – custom floating pill tab bar với center FAB
+ * Figma NavBar (161:864) – floating pill tab bar KHOÉT lõm giữa cho FAB.
  *
- * Layout (từ Figma):
- *   – Pill-shaped bar (bg-surface, shadow, rounded-pill)
- *   – 4 tabs: Home | Memories | [FAB] | Explore | Profile
- *   – Center FAB: 64×64 circle bg-accent, protrudes above bar
+ * Toàn bộ phần hình (bar khoét, shadow, glow, FAB gradient) do
+ * NavBarBackdrop vẽ bằng Skia trong MỘT canvas → shadow liền khối.
+ * File này chỉ lo phần tương tác: 4 tab buttons + hit-area của FAB + icon.
  *
- * Usage với Expo Router – pass vào tabBar prop:
+ * Usage với React Navigation – pass vào tabBar prop:
  * @example
  * <Tabs tabBar={(props) => <NavBar {...props} />}>
  *   ...
@@ -23,15 +33,16 @@ export type TabKey = 'home' | 'memories' | 'explore' | 'profile';
 
 interface TabItem {
   key: TabKey;
-  label: string;
+  /** i18n key — render qua t() trong NavBar */
+  labelKey: string;
   icon: IconName;
 }
 
 const TABS: TabItem[] = [
-  { key: 'home',      label: 'Trang chủ', icon: 'home' },
-  { key: 'memories',  label: 'Ký ức',     icon: 'image' },
-  { key: 'explore',   label: 'Khám phá',  icon: 'compass' },
-  { key: 'profile',   label: 'Hồ sơ',     icon: 'user' },
+  { key: 'home',      labelKey: 'tabs.home',      icon: 'home' },
+  { key: 'memories',  labelKey: 'tabs.memories',  icon: 'image' },
+  { key: 'explore',   labelKey: 'tabs.explore',   icon: 'compass' },
+  { key: 'profile',   labelKey: 'tabs.profile',   icon: 'user' },
 ];
 
 interface NavBarProps {
@@ -41,23 +52,22 @@ interface NavBarProps {
   onTabPress?: (tab: TabKey) => void;
   /** Called when center FAB is pressed */
   onFabPress?: () => void;
-  // Expo Router BottomTabBarProps (optional wiring)
+  // React Navigation BottomTabBarProps (optional wiring)
   state?: BottomTabBarProps['state'];
   navigation?: BottomTabBarProps['navigation'];
 }
 
-const FAB_SIZE  = 64;
-const BAR_HEIGHT = 64;
-const FAB_OVERLAP = 20; // how much FAB sits above the bar
+/** Khoảng trống giữa bar dành cho vùng khoét (Figma spacer 72px) */
+const CENTER_SPACER = 72;
 
 export function NavBar({ activeTab, onTabPress, onFabPress, state, navigation }: NavBarProps) {
   const insets = useSafeAreaInsets();
   const bottomPad = insets.bottom || (Platform.OS === 'ios' ? 16 : 8);
 
-  // Resolve active tab from Expo Router state if provided
-  const resolvedActive: TabKey | undefined = activeTab ?? (
-    state ? (TABS[state.index < 2 ? state.index : state.index + 1]?.key) : undefined
-  );
+  // Resolve active tab từ navigation state nếu không truyền activeTab.
+  // state.routes map 1-1 với TABS (FAB không phải route).
+  const resolvedActive: TabKey | undefined =
+    activeTab ?? (state ? TABS[state.index]?.key : undefined);
 
   const handleTabPress = (tab: TabKey, routeIndex?: number) => {
     if (navigation && state && routeIndex !== undefined) {
@@ -73,50 +83,24 @@ export function NavBar({ activeTab, onTabPress, onFabPress, state, navigation }:
 
   return (
     <View
-      style={{ paddingBottom: bottomPad }}
-      className="absolute bottom-0 left-0 right-0 items-center"
+      pointerEvents="box-none"
+      style={{ height: GLOW_BLEED + NAV_OVERHANG + BAR_HEIGHT + bottomPad }}
+      className="absolute bottom-0 left-0 right-0"
     >
-      {/* FAB – positioned above bar */}
+      {/* Backdrop Skia: bar khoét + shadow + glow + FAB (vẽ liền một khối) */}
+      <NavBarBackdrop bottomBleed={bottomPad} />
+
+      {/* Tab row – overlay đúng vùng bar */}
       <View
+        pointerEvents="box-none"
+        className="absolute flex-row items-center"
         style={{
-          position: 'absolute',
-          top: -(FAB_SIZE / 2 - FAB_OVERLAP),
-          zIndex: 10,
-          width: FAB_SIZE,
-          height: FAB_SIZE,
+          top: GLOW_BLEED + NAV_OVERHANG,
+          left: BAR_MARGIN_X,
+          right: BAR_MARGIN_X,
+          height: BAR_HEIGHT,
         }}
       >
-        {/* Glow ring */}
-        <View
-          style={{
-            position: 'absolute',
-            width: FAB_SIZE + 32,
-            height: FAB_SIZE + 32,
-            borderRadius: (FAB_SIZE + 32) / 2,
-            top: -16, left: -16,
-            backgroundColor: 'rgba(212,83,126,0.2)',
-          }}
-        />
-        <TouchableOpacity
-          onPress={onFabPress}
-          activeOpacity={0.85}
-          style={{
-            width: FAB_SIZE,
-            height: FAB_SIZE,
-            borderRadius: FAB_SIZE / 2,
-          }}
-          className="bg-accent items-center justify-center shadow-xl"
-        >
-          <Icon name="plus" size="lg" color="#FFFFFF" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Pill bar */}
-      <View
-        className="flex-row items-center bg-surface rounded-pill shadow-lg mx-4"
-        style={{ height: BAR_HEIGHT, marginTop: FAB_SIZE / 2 - FAB_OVERLAP }}
-      >
-        {/* Left tabs */}
         {leftTabs.map((tab, i) => (
           <TabButton
             key={tab.key}
@@ -126,10 +110,9 @@ export function NavBar({ activeTab, onTabPress, onFabPress, state, navigation }:
           />
         ))}
 
-        {/* Center spacer (FAB area) */}
-        <View style={{ width: FAB_SIZE + 16 }} />
+        {/* Spacer cho vùng khoét */}
+        <View pointerEvents="none" style={{ width: CENTER_SPACER }} />
 
-        {/* Right tabs */}
         {rightTabs.map((tab, i) => (
           <TabButton
             key={tab.key}
@@ -139,6 +122,21 @@ export function NavBar({ activeTab, onTabPress, onFabPress, state, navigation }:
           />
         ))}
       </View>
+
+      {/* FAB hit-area – hình do backdrop vẽ, đây chỉ là vùng chạm + icon */}
+      <TouchableOpacity
+        onPress={onFabPress}
+        activeOpacity={0.7}
+        className="absolute items-center justify-center self-center"
+        style={{
+          top: GLOW_BLEED + NAV_OVERHANG - FAB_LIFT - FAB_SIZE / 2,
+          width: FAB_SIZE,
+          height: FAB_SIZE,
+          borderRadius: FAB_SIZE / 2,
+        }}
+      >
+        <Icon name="plus" size={28} color="#FFFFFF" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -150,16 +148,19 @@ function TabButton({
   active,
   onPress,
 }: { tab: TabItem; active: boolean; onPress: () => void }) {
+  const { t } = useTranslation();
+  const colors = useThemeColors();
   return (
     <TouchableOpacity
       className="flex-1 items-center justify-center gap-0.5 py-1"
       onPress={onPress}
       activeOpacity={0.7}
     >
+      {/* Màu phải là hex resolve theo theme — vector-icons không hiểu var(--*) */}
       <Icon
         name={tab.icon}
-        size="md"
-        color={active ? 'var(--color-accent)' : 'var(--color-text-muted)'}
+        size="lg"
+        color={active ? colors['--color-accent'] : colors['--color-text-muted']}
       />
       <Text
         className={[
@@ -168,7 +169,7 @@ function TabButton({
         ].join(' ')}
         numberOfLines={1}
       >
-        {tab.label}
+        {t(tab.labelKey)}
       </Text>
     </TouchableOpacity>
   );

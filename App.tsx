@@ -72,6 +72,7 @@ export default function App() {
         <View style={[{ flex: 1 }, themeVars[theme]]}>
           <StatusBar style={theme === 'midnight-gold' ? 'light' : 'dark'} />
           <NavigationContainer linking={linking}>
+            {/* Có session → vào thẳng App (nav bar); chưa có → flow auth */}
             <RootNavigator initialRouteName={sessionAuthenticated ? 'App' : 'Welcome'} />
           </NavigationContainer>
         </View>
