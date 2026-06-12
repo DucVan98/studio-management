@@ -11,7 +11,6 @@ import type { LinkingOptions } from '@react-navigation/native';
 import { useValue } from '@legendapp/state/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { appStore$, appActions } from '@/stores';
-import { initPersistence } from '@/stores/persistence/mmkv.adapter.ts';
 import { themeVars } from '@/tokens';
 import { queryClient } from '@/queries';
 import { DIContainer } from '@/di/DIContainer.ts';
@@ -44,9 +43,6 @@ export default function App() {
   useEffect(() => {
     async function bootstrap() {
       try {
-        // Đợi Nitro runtime sẵn sàng trước khi init MMKV HybridObject.
-        await new Promise<void>(resolve => setTimeout(resolve, 50));
-        initPersistence();
         const tokens = await withBootTimeout(DIContainer.getInstance().session.restore());
         setSessionAuthenticated(tokens !== null);
         appActions.initialize();

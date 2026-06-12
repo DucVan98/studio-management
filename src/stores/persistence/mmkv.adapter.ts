@@ -1,70 +1,34 @@
 import type { ObservableParam } from '@legendapp/state';
+import { syncObservable } from '@legendapp/state/sync';
+import { ObservablePersistMMKV } from '@legendapp/state/persist-plugins/mmkv';
 
-// ⚠️ KHÔNG khởi tạo MMKV ở top-level.
-// react-native-mmkv v4 tạo nitro HybridObject; gọi `new MMKV()` đồng bộ khi
-// bundle evaluate sẽ deadlock với nitro dispatcher trên New Architecture/bridgeless
-// → app treo ở màn "Downloading 100%".
-// Giải pháp: xếp hàng các observable, gọi initPersistence() sau first render (App bootstrap).
+// ⚠️ QUAN TRỌNG: file này phải dùng static `import` cho mọi module @legendapp/state.
+//
+// Bài học từ bug treo splash (xem docs/mmkv-nitro-deadlock.md): phiên bản cũ
+// lazy-load bằng `require('@legendapp/state/sync')`. Với Metro (RN 0.85+,
+// package exports bật mặc định), `import` resolve ra bản ESM (index.mjs) còn
+// `require()` resolve ra bản CJS (index.js) → bundle chứa HAI instance
+// Legend-State. Observable tạo bởi instance ESM (các store) nhưng được
+// syncObservable của instance CJS xử lý → symbol nội bộ không khớp, node graph
+// bị hỏng (cycle trong chuỗi parent) → `getNodeValue` lặp vô hạn, JS thread
+// treo vĩnh viễn ở splash. KHÔNG phải lỗi MMKV/Nitro.
 
- 
-type PendingEntry = { observable: ObservableParam<any>; key: string };
+let _plugin: ObservablePersistMMKV | null = null;
 
-let _initialized = false;
-let _plugin: object | null = null;
-const _pending: PendingEntry[] = [];
-
- 
-function wireObservable(observable: ObservableParam<any>, key: string): void {
-  if (!_plugin) return;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { syncObservable } = require('@legendapp/state/sync') as {
-       
-      syncObservable: (obs: ObservableParam<any>, opts: object) => void;
-    };
-    syncObservable(observable, { persist: { name: key, plugin: _plugin } });
-  } catch {
-    // no-op — app chạy với state in-memory
-  }
-}
-
-/**
- * Khởi tạo MMKV persistence. Phải gọi trong App bootstrap (sau first render),
- * KHÔNG gọi ở module top-level. Idempotent — gọi nhiều lần an toàn.
- */
-export function initPersistence(): void {
-  if (_initialized) return;
-  _initialized = true;
-
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { ObservablePersistMMKV } = require('@legendapp/state/persist-plugins/mmkv') as {
-      ObservablePersistMMKV: new (opts: { id: string }) => object;
-    };
+function getPlugin(): ObservablePersistMMKV {
+  if (!_plugin) {
     _plugin = new ObservablePersistMMKV({ id: 'app-storage' });
-  } catch {
-    _plugin = null;
   }
-
-  for (const entry of _pending) {
-    wireObservable(entry.observable, entry.key);
-  }
-  _pending.length = 0;
+  return _plugin;
 }
 
 /**
  * Đăng ký một observable để persist vào MMKV. An toàn ở top-level module —
- * nếu chưa init thì xếp hàng và tự wire khi initPersistence() được gọi.
+ * MMKV v4 khởi tạo đồng bộ qua Nitro hoạt động bình thường trên New Architecture.
  */
 export function configurePersistence<T>(
   observable$: ObservableParam<T>,
   key: string,
 ): void {
-  if (_initialized) {
-     
-    wireObservable(observable$ as ObservableParam<any>, key);
-    return;
-  }
-   
-  _pending.push({ observable: observable$ as ObservableParam<any>, key });
+  syncObservable(observable$, { persist: { name: key, plugin: getPlugin() } });
 }
