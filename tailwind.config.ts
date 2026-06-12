@@ -1,7 +1,12 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  content: ['./app/**/*.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'],
+  content: [
+    './app/**/*.{js,jsx,ts,tsx}',
+    './src/**/*.{js,jsx,ts,tsx}',
+    // Stories Storybook (chỉ được bundle khi STORYBOOK_ENABLED=true)
+    './.rnstorybook/**/*.{js,jsx,ts,tsx}',
+  ],
   // eslint-disable-next-line @typescript-eslint/no-require-imports -- nativewind/preset không có ESM types
   presets: [require('nativewind/preset')],
   theme: {
@@ -27,9 +32,9 @@ const config: Config = {
       },
       fontFamily: {
         // Map Figma font styles → font families
-        sans:   ['Inter_400Regular', 'System'],
-        medium: ['Inter_500Medium', 'System'],
-        bold:   ['Inter_700Bold', 'System'],
+        sans:   ['DMSans_400Regular', 'System'],
+        medium: ['DMSans_500Medium', 'System'],
+        bold:   ['DMSans_700Bold', 'System'],
         // Heading serif (Figma dùng serif display). Dùng font hệ thống:
         // iOS có 'Georgia'; Android fallback generic 'serif'.
         serif:  ['Georgia', 'serif'],
@@ -47,6 +52,7 @@ const config: Config = {
         // TextInput + lineHeight wrap như multiline và lệch căn giữa dọc.
         'body-input': '14px',
         'body-sm':    ['12px', { lineHeight: '16px' }],
+        'button':     ['15px', { lineHeight: '20px' }], // Figma: text button 15px Medium
         'label':      ['11px', { lineHeight: '14px', letterSpacing: '0.5px' }],
       },
       borderRadius: {

@@ -90,6 +90,8 @@ Ngoại lệ (KHÔNG cần bọc): React/React Native core, Expo runtime cơ b�
 
 **Component** (`src/components/ui/`): function component, props có interface rõ ràng, style bằng `className` + token. Map 1-1 từ Figma khi có. Export lại qua `index.ts`.
 
+**Icon**: TOÀN BỘ icon phải là SVG render qua `react-native-svg`, dùng component `Icon` (`src/components/ui/Icon.tsx`) với path data trong `iconPaths.tsx`. KHÔNG dùng `@expo/vector-icons` hay icon font khác. Thêm icon mới: export SVG từ Figma (viewBox 24x24, stroke-based, strokeWidth 2) hoặc copy path từ Feather, thêm vào `IconName` + `ICON_PATHS`.
+
 **Screen** (`src/screens/<area>/`): bọc `SafeAreaView className="flex-1 bg-bg"`, text người dùng thấy phải qua `t('...')` (cả `en` và `vi`).
 
 ## Quy tắc chung

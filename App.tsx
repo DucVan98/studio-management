@@ -6,6 +6,12 @@ import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
+import {
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_700Bold,
+} from '@expo-google-fonts/dm-sans';
 import { NavigationContainer } from '@react-navigation/native';
 import type { LinkingOptions } from '@react-navigation/native';
 import { useValue } from '@legendapp/state/react';
@@ -39,6 +45,12 @@ export default function App() {
   // Dùng SecureStore (session) thay vì authStore$.user (MMKV) để định tuyến —
   // session.restore() là nguồn đúng cho trạng thái auth khi khởi động.
   const [sessionAuthenticated, setSessionAuthenticated] = useState(false);
+  // Load font DM Sans theo design Figma; fontError → vẫn render với System font
+  const [fontsLoaded, fontError] = useFonts({
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_700Bold,
+  });
 
   useEffect(() => {
     async function bootstrap() {
@@ -63,7 +75,7 @@ export default function App() {
     });
   }, []);
 
-  if (!booted) return null;
+  if (!booted || (!fontsLoaded && !fontError)) return null;
 
   return (
     <SafeAreaProvider>
