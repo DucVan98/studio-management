@@ -3,6 +3,7 @@ import type {
   CoupleDto,
   CoupleInviteDto,
   CoupleStatsDto,
+  CreateInviteRequestDto,
 } from '../types/api.types';
 
 export interface ICoupleDataSource {
@@ -11,7 +12,7 @@ export interface ICoupleDataSource {
   updateTheme(theme: string): Promise<CoupleDto>;
   getStats(): Promise<CoupleStatsDto>;
   getActivity(limit?: number, offset?: number): Promise<CoupleActivityDto[]>;
-  createInvite(): Promise<CoupleInviteDto>;
+  createInvite(req?: CreateInviteRequestDto): Promise<CoupleInviteDto>;
   getInvite(code: string): Promise<CoupleInviteDto>;
   acceptInvite(code: string, startDate: string): Promise<CoupleDto>;
 }

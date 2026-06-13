@@ -6,6 +6,7 @@ import type {
   CoupleDto,
   CoupleInviteDto,
   CoupleStatsDto,
+  CreateInviteRequestDto,
   UpdateStartDateRequestDto,
   UpdateThemeRequestDto,
 } from '../types/api.types';
@@ -45,8 +46,8 @@ export class HttpCoupleDataSource implements ICoupleDataSource {
     return res.data;
   }
 
-  async createInvite(): Promise<CoupleInviteDto> {
-    const res = await this.http.post<CoupleInviteDto>('/couple/invite');
+  async createInvite(req?: CreateInviteRequestDto): Promise<CoupleInviteDto> {
+    const res = await this.http.post<CoupleInviteDto>('/couple/invite', req);
     return res.data;
   }
 

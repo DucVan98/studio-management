@@ -71,5 +71,8 @@ export function mapCoupleInvite(dto: CoupleInviteDto): CoupleInvite {
     acceptedAt: dto.accepted_at,
     acceptedBy: dto.accepted_by,
     createdAt: dto.created_at,
+    // Normalize về YYYY-MM-DD — backend trả ISO datetime (2026-06-01T00:00:00Z)
+    startDate: dto.start_date ? dto.start_date.slice(0, 10) : undefined,
+    dateType: dto.date_type as CoupleInvite['dateType'],
   };
 }

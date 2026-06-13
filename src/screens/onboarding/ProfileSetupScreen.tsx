@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import {
   View,
-  Text,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { authActions } from '../../stores/auth.store';
+import { onboardingActions } from '../../stores/onboarding.store';
 import { Button, Input, Icon, Alert } from '../../components/ui';
 import { OnboardingScreen, OnboardingHeading } from '../../components/onboarding';
 
@@ -17,14 +16,23 @@ export function ProfileSetupScreen() {
   const navigation = useNavigation();
   const [name, setName] = useState('');
   const [partnerNickname, setPartnerNickname] = useState('');
-  const [showComingSoon, setShowComingSoon] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   const handleContinue = () => {
     if (!name.trim()) {
-      // Validation đơn giản — dùng Alert inline thay vì OS dialog
+      setNameError('Vui lòng nhập tên của bạn');
       return;
     }
+    setNameError(null);
     authActions.updateUser({ name, partnerNickname });
+
+    // Nếu vào từ deep link mời (User2): bỏ qua StartDate/Invite, sang thẳng PartnerAccept
+    const pendingCode = onboardingActions.getPendingInviteCode();
+    if (pendingCode) {
+      onboardingActions.setPendingInviteCode(null);
+      navigation.reset({ index: 0, routes: [{ name: 'PartnerAccept', params: { code: pendingCode } }] });
+      return;
+    }
     navigation.navigate('StartDate');
   };
 
@@ -44,40 +52,19 @@ export function ProfileSetupScreen() {
             subtitle="Để nửa kia nhận ra bạn ngay"
           />
 
-          {/* Thông báo coming soon ảnh đại diện */}
-          {showComingSoon && (
+          {/* Lỗi validation tên */}
+          {nameError && (
             <View className="mt-4">
-              <Alert
-                type="info"
-                title="Sắp ra mắt"
-                message="Chọn ảnh đại diện đang được hoàn thiện"
-                onClose={() => setShowComingSoon(false)}
-              />
+              <Alert type="error" title={nameError} onClose={() => setNameError(null)} />
             </View>
           )}
 
-          {/* Avatar */}
+          {/* Avatar — camera icon ẩn cho đến khi có feature upload ảnh */}
           <View className="items-center mt-6">
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => setShowComingSoon(true)}
-            >
-              <View className="w-28 h-28 rounded-pill bg-surface-alt items-center justify-center">
-                <Icon name="user" size={48} color="#D4537E" />
-              </View>
-              <View className="absolute bottom-0 right-0 w-9 h-9 rounded-pill bg-accent items-center justify-center border-2 border-bg">
-                <Icon name="camera" size={18} color="#FFFFFF" />
-              </View>
-            </TouchableOpacity>
-            <Text className="text-body-sm text-text-muted mt-3">Thêm ảnh đại diện</Text>
-          </View>
-
-          {/* Validation inline */}
-          {!name.trim() && name.length > 0 && (
-            <View className="mt-4">
-              <Alert type="error" title="Vui lòng nhập tên của bạn" />
+            <View className="w-28 h-28 rounded-pill bg-surface-alt items-center justify-center">
+              <Icon name="user" size={48} color="#D4537E" />
             </View>
-          )}
+          </View>
 
           <View className="gap-4 mt-6">
             <Input

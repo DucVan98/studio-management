@@ -5,6 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 import { DIContainer } from '../../di/DIContainer';
 import { Button, Icon } from '../../components/ui';
 import { OnboardingScreen } from '../../components/onboarding';
+import { onboardingStore$, onboardingActions } from '../../stores/onboarding.store';
+import { buildInviteLink } from '../../config/links';
 
 /** Màn 5 · Mời nửa kia (Figma 9:2). */
 export function InviteScreen() {
@@ -12,12 +14,28 @@ export function InviteScreen() {
   const [code, setCode] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
-  // Tạo invite một lần khi mount
+  // Tạo invite một lần khi mount — gửi kèm startDate/dateType từ store
+  // để backend lưu vào invite row và embed vào SSE payload khi partner accept
   useEffect(() => {
     let active = true;
+
+    // Đã chuẩn hoá về YYYY-MM-DD theo giờ địa phương (an toàn với data cũ trong MMKV)
+    const startDate = onboardingActions.getRelationshipStartDate() ?? undefined;
+    const dateType = onboardingStore$.dateType.peek();
+
+    // Map store DateType → API date_type string
+    const dateTypeMap: Record<string, string> = {
+      love: 'love',
+      wedding: 'wedding',
+      first_met: 'first-meet',
+    };
+
     DIContainer.getInstance()
       .getCreateInviteUseCase()
-      .execute()
+      .execute({
+        startDate,
+        dateType: dateType ? dateTypeMap[dateType] : undefined,
+      })
       .then((invite) => active && setCode(invite.code))
       .catch(() => active && setError(true));
     return () => {
@@ -32,16 +50,21 @@ export function InviteScreen() {
 
     const cleanup = DIContainer.getInstance()
       .getInviteSSEClient()
-      .watch(code, () => {
-        // Nhận event "accepted" từ server → navigate ngay vào App
-        navigation.reset({ index: 0, routes: [{ name: 'App' }] });
+      .watch(code, ({ partnerName, startDate }) => {
+        // Nhận event "accepted" từ server → User1 cũng được màn Connected
+        // như User2, không bị văng thẳng vào App mà thiếu celebration
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Connected', params: { partnerName, startDate } }],
+        });
       });
 
     // Cleanup đóng AbortController → server biết user1 đã rời màn hình
     return cleanup;
   }, [code, navigation]);
 
-  const link = code ? `https://everly.app/join/${code}` : '';
+  // Deep link để User2 mở app trực tiếp (không qua browser)
+  const link = code ? buildInviteLink(code) : '';
 
   // Không có lib clipboard — dùng native Share sheet (có sẵn hành động Copy).
   const share = () => {
@@ -84,7 +107,7 @@ export function InviteScreen() {
             ) : code ? (
               <>
                 <QRCode
-                  value={`https://everly.app/join/${code}`}
+                  value={buildInviteLink(code)}
                   size={140}
                   color="#6B1A1A"
                   backgroundColor="white"

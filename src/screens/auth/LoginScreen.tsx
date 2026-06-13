@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { DIContainer } from '../../di/DIContainer';
 import { EmailUnverifiedError } from '../../domain/errors/AppError';
 import { authActions } from '../../stores/auth.store';
+import { onboardingActions } from '../../stores/onboarding.store';
 import { Button, Input, Alert } from '../../components/ui';
 import type { AlertType } from '../../components/ui';
 import {
@@ -45,6 +46,14 @@ export function LoginScreen() {
         { id: user.id, email: user.email, name: user.name, avatar: user.avatarUrl, coupleId: user.coupleId },
         tokens.accessToken,
       );
+
+      // Đăng nhập từ deep link mời (chưa có couple) → sang thẳng PartnerAccept
+      const pendingCode = onboardingActions.getPendingInviteCode();
+      if (pendingCode && !user.coupleId) {
+        onboardingActions.setPendingInviteCode(null);
+        navigation.reset({ index: 0, routes: [{ name: 'PartnerAccept', params: { code: pendingCode } }] });
+        return;
+      }
 
       const nextRoute = user.coupleId ? 'App' : 'Invite';
       navigation.reset({ index: 0, routes: [{ name: nextRoute }] });

@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Button, Icon, Pill } from '../../components/ui';
 import { OnboardingScreen, OnboardingHeading } from '../../components/onboarding';
+import { onboardingActions } from '../../stores/onboarding.store';
+import type { DateType } from '../../stores/onboarding.store';
 
 const WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 const WEEKDAY_FULL = [
@@ -53,7 +55,15 @@ export function StartDateScreen() {
   const typeLabel = DATE_TYPES.find((t) => t.key === dateType)!.label;
 
   const handleContinue = () => {
-    // Ngày bắt đầu sẽ được áp dụng khi tạo couple (accept invite). Tạm chuyển tiếp.
+    // Map key màn hình sang DateType của store (first-meet → first_met)
+    const storeTypeMap: Record<DateTypeKey, DateType> = {
+      love: 'love',
+      wedding: 'wedding',
+      'first-meet': 'first_met',
+    };
+    // Persist vào store — sẽ được đọc lại khi tạo invite để gửi lên backend
+    onboardingActions.saveRelationshipDate(selected);
+    onboardingActions.setDateType(storeTypeMap[dateType]);
     navigation.navigate('Invite');
   };
 

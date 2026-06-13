@@ -1,6 +1,7 @@
 import type { ICoupleDataSource } from '../datasources/ICoupleDataSource';
 import type {
   ActivityQuery,
+  CreateInviteInput,
   ICoupleRepository,
 } from '../../domain/repositories/ICoupleRepository';
 import type {
@@ -44,8 +45,10 @@ export class HttpCoupleRepository implements ICoupleRepository {
     });
   }
 
-  createInvite(): Promise<CoupleInvite> {
-    return guard(async () => mapCoupleInvite(await this.dataSource.createInvite()));
+  createInvite(input?: CreateInviteInput): Promise<CoupleInvite> {
+    return guard(async () => mapCoupleInvite(await this.dataSource.createInvite(
+      input ? { start_date: input.startDate, date_type: input.dateType } : undefined,
+    )));
   }
 
   getInvite(code: string): Promise<CoupleInvite> {

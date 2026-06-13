@@ -11,8 +11,17 @@
  *   - Dễ test và swap nếu sau này chuyển sang WebSocket
  */
 
+/** Payload server push khi partner accept invite. */
+export interface InviteAcceptedPayload {
+  coupleId: string;
+  /** Tên partner — dùng để hiển thị trong Connected screen */
+  partnerName?: string;
+  /** Ngày bắt đầu couple — ISO string */
+  startDate?: string;
+}
+
 /** Callback gọi khi server gửi event "accepted". */
-export type InviteAcceptedCallback = (payload: { coupleId: string }) => void;
+export type InviteAcceptedCallback = (payload: InviteAcceptedPayload) => void;
 
 export interface IInviteSSEClient {
   /**
@@ -124,8 +133,16 @@ export class InviteSSEClient implements IInviteSSEClient {
       for (const ev of parseSSEChunk(complete)) {
         if (ev.event === 'accepted') {
           try {
-            const parsed = JSON.parse(ev.data) as { couple_id: string };
-            onAccepted({ coupleId: parsed.couple_id });
+            const parsed = JSON.parse(ev.data) as {
+              couple_id: string;
+              partner_name?: string;
+              start_date?: string;
+            };
+            onAccepted({
+              coupleId: parsed.couple_id,
+              partnerName: parsed.partner_name,
+              startDate: parsed.start_date,
+            });
           } catch {
             onAccepted({ coupleId: '' });
           }

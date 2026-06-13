@@ -12,6 +12,13 @@ export interface ActivityQuery {
   offset?: number;
 }
 
+export interface CreateInviteInput {
+  /** Ngày User1 chọn ở màn StartDate — YYYY-MM-DD */
+  startDate?: string;
+  /** Loại cột mốc: "love" | "wedding" | "first-meet" */
+  dateType?: string;
+}
+
 export interface ICoupleRepository {
   /** GET /couple */
   getCouple(): Promise<Couple>;
@@ -23,8 +30,8 @@ export interface ICoupleRepository {
   getStats(): Promise<CoupleStats>;
   /** GET /couple/activity */
   getActivity(query?: ActivityQuery): Promise<CoupleActivity[]>;
-  /** POST /couple/invite — hết hạn sau 7 ngày */
-  createInvite(): Promise<CoupleInvite>;
+  /** POST /couple/invite — gửi kèm startDate/dateType để backend embed vào SSE payload */
+  createInvite(input?: CreateInviteInput): Promise<CoupleInvite>;
   /** GET /couple/invite/:code — preview trước khi accept */
   getInvite(code: string): Promise<CoupleInvite>;
   /** POST /couple/invite/:code/accept — sau đó PHẢI refresh token */

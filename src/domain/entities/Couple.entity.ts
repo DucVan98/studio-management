@@ -55,4 +55,8 @@ export interface CoupleInvite {
   acceptedAt?: string;
   acceptedBy?: string;
   createdAt: string;
+  /** Ngày User1 đã chọn — backend trả về sau khi fix POST /invites */
+  startDate?: string;
+  /** Loại cột mốc User1 chọn */
+  dateType?: 'love' | 'wedding' | 'first-meet';
 }

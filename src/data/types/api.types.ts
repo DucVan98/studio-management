@@ -125,6 +125,15 @@ export interface CoupleInviteDto {
   accepted_at?: string;
   accepted_by?: string;
   created_at: string;
+  /** Ngày User1 đã chọn ở màn StartDate */
+  start_date?: string;
+  /** Loại cột mốc User1 chọn */
+  date_type?: string;
+}
+
+export interface CreateInviteRequestDto {
+  start_date?: string; // YYYY-MM-DD
+  date_type?: string;  // "love" | "wedding" | "first-meet"
 }
 
 export interface AcceptInviteRequestDto {

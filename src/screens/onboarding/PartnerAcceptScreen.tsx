@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { DIContainer } from '../../di/DIContainer';
 import { authActions } from '../../stores/auth.store';
+import { onboardingActions } from '../../stores/onboarding.store';
 import { Button, Icon, Alert } from '../../components/ui';
 import { OnboardingScreen } from '../../components/onboarding';
 import type { RootStackParamList } from '../../navigation/types';
@@ -20,16 +21,26 @@ export function PartnerAcceptScreen() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const inviter = inviterName ?? 'Người ấy';
 
+  // Vào qua deep link/QR nhưng chưa đăng nhập → lưu code, đẩy về Welcome.
+  // Sau khi đăng nhập/đăng ký xong sẽ tự quay lại màn này (xem ProfileSetup/Login).
+  useEffect(() => {
+    if (code && !authActions.isAuthenticated()) {
+      onboardingActions.setPendingInviteCode(code);
+      navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] });
+    }
+  }, [code, navigation]);
+
   const [daysTogether, setDaysTogether] = useState<number | null>(null);
   useEffect(() => {
-    if (!code) return;
+    if (!code || !authActions.isAuthenticated()) return;
     let active = true;
     DIContainer.getInstance()
       .getGetInviteUseCase()
       .execute(code)
       .then((invite) => {
         if (active) {
-          const date = invite.createdAt.slice(0, 10);
+          // Ưu tiên startDate User1 đã chọn; fallback về createdAt nếu backend chưa trả
+          const date = invite.startDate ?? invite.createdAt.slice(0, 10);
           setStartDate(date);
           setDaysTogether(Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 86_400_000)));
         }
@@ -140,7 +151,7 @@ export function PartnerAcceptScreen() {
         />
         <TouchableOpacity
           className="items-center mt-5"
-          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'App' }] })}
+          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'Invite' }] })}
         >
           <Text className="text-body-md text-text-muted">Từ chối</Text>
         </TouchableOpacity>
