@@ -17,6 +17,7 @@
     "storybook:android": "cross-env STORYBOOK_ENABLED=true EXPO_PUBLIC_STORYBOOK_ENABLED=true expo run:android"
   },
   "dependencies": {
+    "@ducanh261101a/react-native-nitro-splash": "git+https://github.com/ducanh261101a/react-native-nitro-splash.git",
     "@expo-google-fonts/dm-sans": "^0.4.1",
     "@expo/vector-icons": "^15.1.1",
     "@gorhom/bottom-sheet": "^5.2.14",
@@ -52,6 +53,7 @@
     "react-native-gesture-handler": "^2.31.2",
     "react-native-mmkv": "^4.3.0",
     "react-native-nitro-modules": "^0.35.9",
+    "react-native-qrcode-svg": "^6.3.15",
     "react-native-reanimated": "^4.3.1",
     "react-native-safe-area-context": "^5.7.0",
     "react-native-screens": "^4.25.2",
