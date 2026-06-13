@@ -21,6 +21,7 @@ import { themeVars } from '@/tokens';
 import { queryClient } from '@/queries';
 import { DIContainer } from '@/di/DIContainer.ts';
 import { splashScreen } from '@/services/SplashScreenService.ts';
+import { LINKING_PREFIXES, INVITE_ROUTE_PATH } from '@/config/links.ts';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import type { RootStackParamList } from '@/navigation/types.ts';
 
@@ -28,10 +29,10 @@ import type { RootStackParamList } from '@/navigation/types.ts';
 // nên không cần preventAutoHide thủ công ở đây.
 
 const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: ['everly://', 'https://everly.app'],
+  prefixes: LINKING_PREFIXES,
   config: {
     screens: {
-      PartnerAccept: 'join/:code',
+      PartnerAccept: INVITE_ROUTE_PATH,
     },
   },
 };
