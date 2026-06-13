@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { DIContainer } from '../../di/DIContainer';
-import { Button, Icon } from '../../components/ui';
+import { authActions } from '../../stores/auth.store';
+import { Button, Icon, Alert } from '../../components/ui';
 import { OnboardingScreen } from '../../components/onboarding';
 import type { RootStackParamList } from '../../navigation/types';
 
@@ -16,6 +17,7 @@ export function PartnerAcceptScreen() {
     useRoute<RouteProp<RootStackParamList, 'PartnerAccept'>>().params;
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const inviter = inviterName ?? 'Người ấy';
 
   const [daysTogether, setDaysTogether] = useState<number | null>(null);
@@ -29,21 +31,19 @@ export function PartnerAcceptScreen() {
         if (active) {
           const date = invite.createdAt.slice(0, 10);
           setStartDate(date);
-          // Date.now() trong async callback — không phải render, hợp lệ
           setDaysTogether(Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 86_400_000)));
         }
       })
       .catch(() => {
         if (active) { setStartDate(null); setDaysTogether(null); }
       });
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [code]);
 
   const handleAccept = async () => {
+    setErrorMsg(null);
     if (!code) {
-      Alert.alert('Có lỗi xảy ra', 'Thiếu mã lời mời');
+      setErrorMsg('Thiếu mã lời mời');
       return;
     }
     setLoading(true);
@@ -52,19 +52,17 @@ export function PartnerAcceptScreen() {
       const date =
         startDate ??
         `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
-      await DIContainer.getInstance()
+      const couple = await DIContainer.getInstance()
         .getAcceptInviteUseCase()
         .execute({ code, startDate: date });
 
+      authActions.updateUser({ coupleId: couple.id });
       navigation.reset({
         index: 0,
         routes: [{ name: 'Connected', params: { partnerName: inviter, startDate: date } }],
       });
     } catch (error) {
-      Alert.alert(
-        'Có lỗi xảy ra',
-        error instanceof Error ? error.message : 'Không thể chấp nhận lời mời',
-      );
+      setErrorMsg(error instanceof Error ? error.message : 'Không thể chấp nhận lời mời');
     } finally {
       setLoading(false);
     }
@@ -99,8 +97,14 @@ export function PartnerAcceptScreen() {
           Chấp nhận để cùng nhau lưu giữ kỷ niệm và đếm từng ngày yêu
         </Text>
 
+        {errorMsg && (
+          <View className="mt-4">
+            <Alert type="error" title="Có lỗi xảy ra" message={errorMsg} onClose={() => setErrorMsg(null)} />
+          </View>
+        )}
+
         {/* Info card */}
-        <View className="bg-surface rounded-md p-5 mt-6 gap-4">
+        <View className="bg-surface rounded-md p-5 mt-4 gap-4">
           <View className="flex-row items-center gap-3">
             <Icon name="user" size="md" color="#B07A86" />
             <View>

@@ -1,6 +1,8 @@
 import { AuthHttpClient } from '../http';
 import { SecureTokenStorage } from '../services/SecureTokenStorage';
 import { AuthSessionService } from '../services/AuthSessionService';
+import { InviteSSEClient } from '../services/InviteSSEClient';
+import type { IInviteSSEClient } from '../services/InviteSSEClient';
 
 // ── DataSources ───────────────────────────────────────────────────────────────
 import { HttpAuthDataSource } from '../data/datasources/HttpAuthDataSource';
@@ -43,6 +45,7 @@ import { RegisterUseCase } from '../domain/usecases/auth/RegisterUseCase';
 import { VerifyEmailUseCase } from '../domain/usecases/auth/VerifyEmailUseCase';
 import { LoginUseCase } from '../domain/usecases/auth/LoginUseCase';
 import { ForgotPasswordUseCase } from '../domain/usecases/auth/ForgotPasswordUseCase';
+import { ResendOtpUseCase } from '../domain/usecases/auth/ResendOtpUseCase';
 import { ResetPasswordUseCase } from '../domain/usecases/auth/ResetPasswordUseCase';
 import { LogoutUseCase } from '../domain/usecases/auth/LogoutUseCase';
 
@@ -107,6 +110,7 @@ export class DIContainer {
   private _onboardingRepository?: IOnboardingRepository;
   private _authRepository?: IAuthRepository;
   private _coupleRepository?: ICoupleRepository;
+  private _inviteSSEClient?: IInviteSSEClient;
   private _memoryRepository?: IMemoryRepository;
   private _milestoneRepository?: IMilestoneRepository;
   private _notificationRepository?: INotificationRepository;
@@ -188,12 +192,25 @@ export class DIContainer {
     return this._subscriptionRepository;
   }
 
+  // ── Services ──────────────────────────────────────────────────────────────
+
+  getInviteSSEClient(): IInviteSSEClient {
+    const host = process.env.EXPO_PUBLIC_API_URL ?? '';
+    const baseURL = `${host.replace(/\/$/, '')}/api/v1`;
+    this._inviteSSEClient ??= new InviteSSEClient(
+      baseURL,
+      () => this.session.getAccessToken(),
+    );
+    return this._inviteSSEClient;
+  }
+
   // ── Auth Use Cases ────────────────────────────────────────────────────────
 
   getRegisterUseCase() { return new RegisterUseCase(this.getAuthRepository()); }
   getVerifyEmailUseCase() { return new VerifyEmailUseCase(this.getAuthRepository(), this.session); }
   getLoginUseCase() { return new LoginUseCase(this.getAuthRepository(), this.session); }
   getForgotPasswordUseCase() { return new ForgotPasswordUseCase(this.getAuthRepository()); }
+  getResendOtpUseCase() { return new ResendOtpUseCase(this.getAuthRepository()); }
   getResetPasswordUseCase() { return new ResetPasswordUseCase(this.getAuthRepository()); }
   getLogoutUseCase() {
     return new LogoutUseCase(

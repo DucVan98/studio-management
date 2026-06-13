@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Share, ActivityIndicator } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
 import { useNavigation } from '@react-navigation/native';
 import { DIContainer } from '../../di/DIContainer';
 import { Button, Icon } from '../../components/ui';
@@ -11,6 +12,7 @@ export function InviteScreen() {
   const [code, setCode] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
+  // Tạo invite một lần khi mount
   useEffect(() => {
     let active = true;
     DIContainer.getInstance()
@@ -23,7 +25,23 @@ export function InviteScreen() {
     };
   }, []);
 
-  const link = code ? `everly.app/join/${code}` : '';
+  // Khi có code, mở SSE connection — server sẽ push event khi partner accept.
+  // Không cần poll: một HTTP connection duy nhất giữ mở, zero overhead khi idle.
+  useEffect(() => {
+    if (!code) return;
+
+    const cleanup = DIContainer.getInstance()
+      .getInviteSSEClient()
+      .watch(code, () => {
+        // Nhận event "accepted" từ server → navigate ngay vào App
+        navigation.reset({ index: 0, routes: [{ name: 'App' }] });
+      });
+
+    // Cleanup đóng AbortController → server biết user1 đã rời màn hình
+    return cleanup;
+  }, [code, navigation]);
+
+  const link = code ? `https://everly.app/join/${code}` : '';
 
   // Không có lib clipboard — dùng native Share sheet (có sẵn hành động Copy).
   const share = () => {
@@ -65,8 +83,12 @@ export function InviteScreen() {
               </Text>
             ) : code ? (
               <>
-                {/* TODO: render QR thật bằng react-native-qrcode-svg */}
-                <View className="w-[140px] h-[140px] bg-text rounded-sm" />
+                <QRCode
+                  value={`https://everly.app/join/${code}`}
+                  size={140}
+                  color="#6B1A1A"
+                  backgroundColor="white"
+                />
                 <Text className="text-body-sm text-text-muted mt-3">Quét để kết nối</Text>
               </>
             ) : (
@@ -106,7 +128,13 @@ export function InviteScreen() {
           disabled={!code}
           onPress={share}
         />
-        <TouchableOpacity className="items-center mt-5" onPress={goHome}>
+        <TouchableOpacity
+          className="items-center mt-4"
+          onPress={() => navigation.navigate('EnterCode')}
+        >
+          <Text className="text-body-md text-accent font-medium">Tôi nhận được mã mời</Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="items-center mt-4" onPress={goHome}>
           <Text className="text-body-md text-text-muted">Để sau</Text>
         </TouchableOpacity>
       </View>

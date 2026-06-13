@@ -35,3 +35,9 @@ export { CapsuleItem } from './CapsuleItem';
 // Navigation
 export { NavBar } from './NavBar';
 export type { TabKey } from './NavBar';
+
+// Alerts & Modals
+export { Alert } from './Alert';
+export type { AlertProps, AlertType } from './Alert';
+export { ConfirmModal } from './ConfirmModal';
+export type { ConfirmModalProps } from './ConfirmModal';

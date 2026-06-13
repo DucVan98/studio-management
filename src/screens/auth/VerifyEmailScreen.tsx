@@ -5,18 +5,20 @@ import {
   TouchableOpacity,
   TextInput,
   Pressable,
-  Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { DIContainer } from '../../di/DIContainer';
 import { authActions } from '../../stores/auth.store';
-import { Button, Icon } from '../../components/ui';
+import { Button, Icon, Alert } from '../../components/ui';
+import type { AlertType } from '../../components/ui';
 import { OnboardingScreen } from '../../components/onboarding';
 import type { RootStackParamList } from '../../navigation/types';
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 45;
+
+type AlertState = { type: AlertType; title: string; message?: string };
 
 /** Màn Xác thực email — OTP 6 số (Figma 176:981). */
 export function VerifyEmailScreen() {
@@ -25,6 +27,7 @@ export function VerifyEmailScreen() {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [seconds, setSeconds] = useState(RESEND_SECONDS);
+  const [alert, setAlert] = useState<AlertState | null>(null);
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
@@ -34,8 +37,9 @@ export function VerifyEmailScreen() {
   }, [seconds]);
 
   const handleVerify = async (value: string) => {
+    setAlert(null);
     if (!userId) {
-      Alert.alert('Có lỗi xảy ra', 'Thiếu thông tin tài khoản, vui lòng đăng ký lại');
+      setAlert({ type: 'error', title: 'Thiếu thông tin tài khoản, vui lòng đăng ký lại' });
       return;
     }
     setLoading(true);
@@ -43,18 +47,18 @@ export function VerifyEmailScreen() {
       const useCase = DIContainer.getInstance().getVerifyEmailUseCase();
       const { user, tokens } = await useCase.execute({ userId, code: value });
 
-      // verify-email thành công ⇒ đã login (session.start gọi trong usecase).
       authActions.login(
-        { id: user.id, email: user.email, name: user.name, avatar: user.avatarUrl },
+        { id: user.id, email: user.email, name: user.name, avatar: user.avatarUrl, coupleId: user.coupleId },
         tokens.accessToken,
       );
       navigation.reset({ index: 0, routes: [{ name: 'ProfileSetup' }] });
     } catch (error) {
       setCode('');
-      Alert.alert(
-        'Có lỗi xảy ra',
-        error instanceof Error ? error.message : 'Mã xác thực không đúng',
-      );
+      setAlert({
+        type: 'error',
+        title: 'Mã xác thực không đúng',
+        message: error instanceof Error ? error.message : 'Vui lòng thử lại',
+      });
     } finally {
       setLoading(false);
     }
@@ -66,10 +70,24 @@ export function VerifyEmailScreen() {
     if (digits.length === OTP_LENGTH) handleVerify(digits);
   };
 
-  const resend = () => {
-    // TODO: ghép API gửi lại OTP khi backend sẵn sàng.
-    setSeconds(RESEND_SECONDS);
-    Alert.alert('Đã gửi lại', `Mã mới đã được gửi tới ${email ?? 'email của bạn'}`);
+  const resend = async () => {
+    if (!userId) return;
+    setAlert(null);
+    try {
+      await DIContainer.getInstance().getResendOtpUseCase().execute({ userId });
+      setSeconds(RESEND_SECONDS);
+      setAlert({
+        type: 'success',
+        title: 'Đã gửi lại',
+        message: `Mã mới đã được gửi tới ${email ?? 'email của bạn'}`,
+      });
+    } catch (error) {
+      setAlert({
+        type: 'error',
+        title: 'Không gửi được',
+        message: error instanceof Error ? error.message : 'Vui lòng thử lại',
+      });
+    }
   };
 
   const mmss = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(
@@ -91,9 +109,15 @@ export function VerifyEmailScreen() {
           </Text>
         </View>
 
-        {/* OTP boxes – 1 TextInput ẩn điều khiển 6 ô hiển thị */}
+        {alert && (
+          <View className="mt-4">
+            <Alert {...alert} onClose={() => setAlert(null)} />
+          </View>
+        )}
+
+        {/* OTP boxes */}
         <Pressable
-          className="flex-row justify-center gap-2 mt-8"
+          className="flex-row justify-center gap-2 mt-6"
           onPress={() => inputRef.current?.focus()}
         >
           {Array.from({ length: OTP_LENGTH }).map((_, i) => {

@@ -90,7 +90,21 @@ Ngoại lệ (KHÔNG cần bọc): React/React Native core, Expo runtime cơ b�
 
 **Component** (`src/components/ui/`): function component, props có interface rõ ràng, style bằng `className` + token. Map 1-1 từ Figma khi có. Export lại qua `index.ts`.
 
+**Icon**: TOÀN BỘ icon phải là SVG render qua `react-native-svg`, dùng component `Icon` (`src/components/ui/Icon.tsx`) với path data trong `iconPaths.tsx`. KHÔNG dùng `@expo/vector-icons` hay icon font khác. Thêm icon mới: export SVG từ Figma (viewBox 24x24, stroke-based, strokeWidth 2) hoặc copy path từ Feather, thêm vào `IconName` + `ICON_PATHS`.
+
 **Screen** (`src/screens/<area>/`): bọc `SafeAreaView className="flex-1 bg-bg"`, text người dùng thấy phải qua `t('...')` (cả `en` và `vi`).
+
+**Thông báo & xác nhận — KHÔNG dùng `Alert` của React Native/OS**. Dùng 2 component sau từ `src/components/ui/`:
+
+| Tình huống | Component | Ví dụ |
+|---|---|---|
+| Lỗi validation, lỗi API, thông báo thành công/info | `<Alert type="error\|warning\|success\|info" title="..." message="..." />` | Lỗi đăng nhập, gửi form thành công |
+| Hỏi xác nhận hành động (có thể huỷ) | `<ConfirmModal ... confirmVariant="primary\|danger" />` | Xoá dữ liệu, đăng xuất |
+
+Luật cụ thể:
+- **`Alert`** hiển thị inline trong màn hình (thêm vào JSX, dùng `useState` để ẩn/hiện). Không dùng toast overlay phức tạp — đặt ngay dưới heading hoặc gần form.
+- **`ConfirmModal`** dùng khi action có hậu quả (xoá, đăng xuất, huỷ kết nối). Dùng `confirmVariant="danger"` nếu action là destructive.
+- `Alert` của `react-native` bị **cấm** trong màn hình — eslint rule `no-restricted-imports` sẽ được thêm vào sau.
 
 ## Quy tắc chung
 

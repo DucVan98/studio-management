@@ -5,8 +5,10 @@ import type { IconName } from './Icon';
 
 /**
  * Figma Button component
- * Variant=Primary  → bg-accent, text-on-accent, rounded-pill
+ * Variant=Primary   → bg-accent, text-on-accent, rounded-pill
  * Variant=Secondary → bg-surface border, text-accent, rounded-pill
+ * Variant=Ghost     → transparent, text-accent
+ * Variant=Danger    → nền hồng nhạt (#FFEEEE), chữ đỏ đậm (#C62626), viền đỏ nhạt (#E2B9B9)
  */
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -20,19 +22,23 @@ interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
   fullWidth?: boolean;
   leftIcon?: IconName;
   rightIcon?: IconName;
+  /** Class bổ sung để override style mặc định khi cần */
+  className?: string;
 }
 
 const VARIANT: Record<Variant, { container: string; text: string; iconColor: string }> = {
-  primary:   { container: 'bg-accent',                      text: 'text-on-accent', iconColor: '#FFFFFF' },
-  secondary: { container: 'bg-surface border border-border', text: 'text-accent',    iconColor: 'currentColor' },
-  ghost:     { container: 'bg-transparent',                  text: 'text-accent',    iconColor: 'currentColor' },
-  danger:    { container: 'bg-error',                        text: 'text-white',     iconColor: '#FFFFFF' },
+  primary:   { container: 'bg-accent',                              text: 'text-on-accent', iconColor: '#FFFFFF' },
+  secondary: { container: 'bg-surface border border-border',        text: 'text-accent',    iconColor: 'var(--color-accent)' },
+  ghost:     { container: 'bg-transparent',                         text: 'text-accent',    iconColor: 'var(--color-accent)' },
+  // Figma Danger: nền hồng nhạt, chữ đỏ đậm, viền đỏ nhạt
+  danger:    { container: 'bg-[#FFEEEE] border border-[#E2B9B9]',   text: 'text-[#C62626]', iconColor: '#C62626' },
 };
 
 const SIZE: Record<Size, { container: string; text: string }> = {
-  sm: { container: 'h-9 px-4 rounded-pill',  text: 'text-body-sm font-medium' },
-  md: { container: 'h-13 px-6 rounded-pill', text: 'text-body-md font-medium' },
-  lg: { container: 'h-14 px-8 rounded-pill', text: 'text-body-lg font-medium' },
+  // Figma dùng padding thay vì fix height: md = px 24 / py 16 (space/24, space/16)
+  sm: { container: 'px-4 py-2 rounded-pill', text: 'text-body-sm font-medium' },
+  md: { container: 'px-6 py-4 rounded-pill', text: 'text-button font-medium' },
+  lg: { container: 'px-8 py-4 rounded-pill', text: 'text-body-lg font-medium' },
 };
 
 export function Button({
@@ -44,6 +50,7 @@ export function Button({
   leftIcon,
   rightIcon,
   disabled,
+  className,
   ...rest
 }: ButtonProps) {
   const v = VARIANT[variant];
@@ -57,6 +64,7 @@ export function Button({
         v.container, s.container,
         fullWidth ? 'w-full' : 'self-start',
         isDisabled ? 'opacity-50' : '',
+        className ?? '',
       ].join(' ')}
       disabled={isDisabled}
       activeOpacity={0.8}

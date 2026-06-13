@@ -6,6 +6,7 @@ import type {
   RefreshRequestDto,
   RegisterRequestDto,
   RegisterResponseDto,
+  ResendOtpRequestDto,
   ResetPasswordRequestDto,
   TokenPairDto,
   VerifyEmailRequestDto,
@@ -28,6 +29,10 @@ export class HttpAuthDataSource implements IAuthDataSource {
       body,
     );
     return res.data;
+  }
+
+  async resendOtp(body: ResendOtpRequestDto): Promise<void> {
+    await this.http.post<void, ResendOtpRequestDto>('/auth/resend-otp', body);
   }
 
   async login(email: string, password: string): Promise<TokenPairDto> {

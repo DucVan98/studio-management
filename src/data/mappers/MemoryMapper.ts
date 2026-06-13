@@ -16,6 +16,9 @@ import type {
   UpdateMemoryParams,
 } from '../../domain/repositories/IMemoryRepository';
 
+/** Go time.Time serializes to RFC3339 (2024-08-15T00:00:00Z) — chuẩn hoá thành YYYY-MM-DD. */
+const toDateStr = (s: string): string => s.split('T')[0];
+
 export function mapMedia(dto: MediaDto): Media {
   return {
     id: dto.id,
@@ -40,7 +43,7 @@ export function mapMemory(dto: MemoryDto): Memory {
     createdById: dto.created_by_id,
     title: dto.title,
     note: dto.note,
-    memoryDate: dto.memory_date,
+    memoryDate: toDateStr(dto.memory_date),
     locationName: dto.location_name,
     latitude: dto.latitude,
     longitude: dto.longitude,

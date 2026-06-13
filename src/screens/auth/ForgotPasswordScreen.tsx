@@ -6,38 +6,45 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { DIContainer } from '../../di/DIContainer';
-import { Button, Input, Icon } from '../../components/ui';
+import { Button, Input, Icon, Alert } from '../../components/ui';
+import type { AlertType } from '../../components/ui';
 import { OnboardingScreen } from '../../components/onboarding';
+
+type AlertState = { type: AlertType; title: string; message?: string; actionLabel?: string; onAction?: () => void };
 
 /** Màn Quên mật khẩu (Figma 176:960). */
 export function ForgotPasswordScreen() {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState<AlertState | null>(null);
 
   const handleReset = async () => {
+    setAlert(null);
     if (!email.trim()) {
-      Alert.alert('Có lỗi xảy ra', 'Vui lòng nhập email');
+      setAlert({ type: 'error', title: 'Vui lòng nhập email' });
       return;
     }
     setLoading(true);
     try {
       await DIContainer.getInstance().getForgotPasswordUseCase().execute(email);
       // Server luôn trả 200 để chống dò email — thông báo chung.
-      Alert.alert(
-        'Đã gửi',
-        'Nếu email tồn tại, chúng tôi đã gửi link đặt lại mật khẩu. Vui lòng kiểm tra hộp thư.',
-        [{ text: 'Xác nhận', onPress: () => navigation.goBack() }],
-      );
+      setAlert({
+        type: 'success',
+        title: 'Đã gửi',
+        message: 'Nếu email tồn tại, chúng tôi đã gửi link đặt lại mật khẩu. Vui lòng kiểm tra hộp thư.',
+        actionLabel: 'Xác nhận',
+        onAction: () => navigation.goBack(),
+      });
     } catch (error) {
-      Alert.alert(
-        'Có lỗi xảy ra',
-        error instanceof Error ? error.message : 'Không thể gửi yêu cầu',
-      );
+      setAlert({
+        type: 'error',
+        title: 'Có lỗi xảy ra',
+        message: error instanceof Error ? error.message : 'Không thể gửi yêu cầu',
+      });
     } finally {
       setLoading(false);
     }
@@ -54,7 +61,6 @@ export function ForgotPasswordScreen() {
           contentContainerClassName="flex-grow px-6 pt-2 pb-8"
           keyboardShouldPersistTaps="handled"
         >
-          {/* Icon */}
           <View className="items-center mt-6">
             <View className="w-16 h-16 rounded-pill bg-surface-alt items-center justify-center">
               <Icon name="lock" size={34} color="#D4537E" />
@@ -67,7 +73,20 @@ export function ForgotPasswordScreen() {
             </Text>
           </View>
 
-          <View className="gap-4 mt-8">
+          {alert && (
+            <View className="mt-6">
+              <Alert
+                type={alert.type}
+                title={alert.title}
+                message={alert.message}
+                actionLabel={alert.actionLabel}
+                onAction={alert.onAction}
+                onClose={() => setAlert(null)}
+              />
+            </View>
+          )}
+
+          <View className="gap-4 mt-6">
             <Input
               label="Email"
               placeholder="ban@email.com"

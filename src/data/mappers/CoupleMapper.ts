@@ -13,15 +13,18 @@ import type {
   CoupleTheme,
 } from '@/domain/entities';
 
+/** Go time.Time serializes to RFC3339 — chuẩn hoá thành YYYY-MM-DD. */
+const toDateStr = (s: string): string => s.split('T')[0];
+
 export function mapCouple(dto: CoupleDto): Couple {
   return {
     id: dto.id,
     user1Id: dto.user1_id,
     user2Id: dto.user2_id,
-    startDate: dto.start_date,
+    startDate: toDateStr(dto.start_date),
     theme: dto.theme as CoupleTheme,
     isPro: dto.is_pro,
-    proUntil: dto.pro_until,
+    proUntil: dto.pro_until ? toDateStr(dto.pro_until) : undefined,
     createdAt: dto.created_at,
     updatedAt: dto.updated_at,
   };
@@ -62,6 +65,7 @@ export function mapCoupleInvite(dto: CoupleInviteDto): CoupleInvite {
   return {
     id: dto.id,
     inviterId: dto.inviter_id,
+    inviterName: dto.inviter_name,
     code: dto.code,
     expiresAt: dto.expires_at,
     acceptedAt: dto.accepted_at,

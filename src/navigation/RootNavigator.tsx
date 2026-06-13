@@ -8,6 +8,7 @@ import { VerifyEmailScreen } from '../screens/auth/VerifyEmailScreen';
 import { ProfileSetupScreen } from '../screens/onboarding/ProfileSetupScreen';
 import { StartDateScreen } from '../screens/onboarding/StartDateScreen';
 import { InviteScreen } from '../screens/onboarding/InviteScreen';
+import { EnterCodeScreen } from '../screens/onboarding/EnterCodeScreen';
 import { PartnerAcceptScreen } from '../screens/onboarding/PartnerAcceptScreen';
 import { ConnectedScreen } from '../screens/onboarding/ConnectedScreen';
 import { AppTabs } from './AppTabs';
@@ -28,6 +29,7 @@ export function RootNavigator({ initialRouteName }: { initialRouteName: keyof Ro
       <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
       <Stack.Screen name="StartDate" component={StartDateScreen} />
       <Stack.Screen name="Invite" component={InviteScreen} />
+      <Stack.Screen name="EnterCode" component={EnterCodeScreen} />
       <Stack.Screen name="PartnerAccept" component={PartnerAcceptScreen} />
       <Stack.Screen name="Connected" component={ConnectedScreen} />
       <Stack.Screen name="App" component={AppTabs} />

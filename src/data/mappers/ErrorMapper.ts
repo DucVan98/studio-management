@@ -1,5 +1,5 @@
 import { HttpError } from '../../http';
-import { AppError, type AppErrorKind } from '../../domain/errors/AppError';
+import { AppError, EmailUnverifiedError, type AppErrorKind } from '../../domain/errors/AppError';
 
 function kindFromStatus(status?: number): AppErrorKind {
   switch (status) {
@@ -21,7 +21,11 @@ export function toAppError(error: unknown): AppError {
   if (AppError.is(error)) return error;
 
   if (HttpError.isHttpError(error)) {
-    const body = error.data as { message?: string; code?: string } | undefined;
+    const body = error.data as { message?: string; code?: string; user_id?: string } | undefined;
+    // EMAIL_UNVERIFIED — lỗi đặc biệt mang user_id để redirect sang màn OTP
+    if (body?.code === 'EMAIL_UNVERIFIED' && body.user_id) {
+      return new EmailUnverifiedError(body.message ?? error.message, body.user_id);
+    }
     return new AppError(
       body?.message ?? error.message,
       kindFromStatus(error.status),

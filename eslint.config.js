@@ -95,6 +95,14 @@ module.exports = defineConfig([
   },
 
   {
-    ignores: ['node_modules/*', '.expo/*', 'dist/*', 'android/*', 'ios/*'],
+    ignores: [
+      'node_modules/*',
+      '.expo/*',
+      'dist/*',
+      'android/*',
+      'ios/*',
+      // File do Storybook tự sinh mỗi lần chạy metro — không lint.
+      '.rnstorybook/storybook.requires.ts',
+    ],
   },
 ]);

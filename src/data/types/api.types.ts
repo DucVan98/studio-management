@@ -49,6 +49,10 @@ export interface VerifyEmailRequestDto {
   code: string;
 }
 
+export interface ResendOtpRequestDto {
+  user_id: string;
+}
+
 export interface LoginRequestDto {
   email: string;
   password: string;
@@ -114,6 +118,8 @@ export interface CoupleActivityDto {
 export interface CoupleInviteDto {
   id: string;
   inviter_id: string;
+  /** Tên người mời — backend embed vào response của GET /invite/:code */
+  inviter_name?: string;
   code: string;
   expires_at: string;
   accepted_at?: string;

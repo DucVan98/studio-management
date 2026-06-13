@@ -2,6 +2,7 @@ import type {
   ForgotPasswordResponseDto,
   RegisterRequestDto,
   RegisterResponseDto,
+  ResendOtpRequestDto,
   ResetPasswordRequestDto,
   TokenPairDto,
   VerifyEmailRequestDto,
@@ -10,6 +11,7 @@ import type {
 export interface IAuthDataSource {
   register(body: RegisterRequestDto): Promise<RegisterResponseDto>;
   verifyEmail(body: VerifyEmailRequestDto): Promise<TokenPairDto>;
+  resendOtp(body: ResendOtpRequestDto): Promise<void>;
   login(email: string, password: string): Promise<TokenPairDto>;
   refresh(refreshToken: string): Promise<TokenPairDto>;
   forgotPassword(email: string): Promise<ForgotPasswordResponseDto>;

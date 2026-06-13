@@ -18,6 +18,7 @@ export type RootStackParamList = {
   ProfileSetup: undefined;
   StartDate: undefined;
   Invite: undefined;
+  EnterCode: undefined;
   PartnerAccept: { code: string; inviterName?: string };
   Connected: { partnerName?: string; startDate?: string };
   App: NavigatorScreenParams<AppTabParamList> | undefined;
