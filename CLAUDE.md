@@ -94,6 +94,18 @@ Ngoại lệ (KHÔNG cần bọc): React/React Native core, Expo runtime cơ b�
 
 **Screen** (`src/screens/<area>/`): bọc `SafeAreaView className="flex-1 bg-bg"`, text người dùng thấy phải qua `t('...')` (cả `en` và `vi`).
 
+**Thông báo & xác nhận — KHÔNG dùng `Alert` của React Native/OS**. Dùng 2 component sau từ `src/components/ui/`:
+
+| Tình huống | Component | Ví dụ |
+|---|---|---|
+| Lỗi validation, lỗi API, thông báo thành công/info | `<Alert type="error\|warning\|success\|info" title="..." message="..." />` | Lỗi đăng nhập, gửi form thành công |
+| Hỏi xác nhận hành động (có thể huỷ) | `<ConfirmModal ... confirmVariant="primary\|danger" />` | Xoá dữ liệu, đăng xuất |
+
+Luật cụ thể:
+- **`Alert`** hiển thị inline trong màn hình (thêm vào JSX, dùng `useState` để ẩn/hiện). Không dùng toast overlay phức tạp — đặt ngay dưới heading hoặc gần form.
+- **`ConfirmModal`** dùng khi action có hậu quả (xoá, đăng xuất, huỷ kết nối). Dùng `confirmVariant="danger"` nếu action là destructive.
+- `Alert` của `react-native` bị **cấm** trong màn hình — eslint rule `no-restricted-imports` sẽ được thêm vào sau.
+
 ## Quy tắc chung
 
 - Comment viết bằng **tiếng Việt** (theo style hiện có trong repo).

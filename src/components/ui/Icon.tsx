@@ -17,7 +17,8 @@ export type IconName =
   | 'star' | 'gift' | 'camera' | 'calendar' | 'mail'
   | 'zap' | 'send' | 'copy' | 'chevron-right' | 'activity'
   | 'map-pin' | 'sun' | 'edit-2' | 'lock' | 'trash-2'
-  | 'chevron-left' | 'check' | 'x' | 'settings' | 'search';
+  | 'chevron-left' | 'check' | 'x' | 'settings' | 'search'
+  | 'alert-circle' | 'alert-triangle' | 'check-circle' | 'info';
 
 export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 

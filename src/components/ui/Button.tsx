@@ -5,8 +5,10 @@ import type { IconName } from './Icon';
 
 /**
  * Figma Button component
- * Variant=Primary  → bg-accent, text-on-accent, rounded-pill
+ * Variant=Primary   → bg-accent, text-on-accent, rounded-pill
  * Variant=Secondary → bg-surface border, text-accent, rounded-pill
+ * Variant=Ghost     → transparent, text-accent
+ * Variant=Danger    → nền hồng nhạt (#FFEEEE), chữ đỏ đậm (#C62626), viền đỏ nhạt (#E2B9B9)
  */
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -25,10 +27,11 @@ interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
 }
 
 const VARIANT: Record<Variant, { container: string; text: string; iconColor: string }> = {
-  primary:   { container: 'bg-accent',                      text: 'text-on-accent', iconColor: '#FFFFFF' },
-  secondary: { container: 'bg-surface border border-border', text: 'text-accent',    iconColor: 'var(--color-accent)' },
-  ghost:     { container: 'bg-transparent',                  text: 'text-accent',    iconColor: 'var(--color-accent)' },
-  danger:    { container: 'bg-error',                        text: 'text-white',     iconColor: '#FFFFFF' },
+  primary:   { container: 'bg-accent',                              text: 'text-on-accent', iconColor: '#FFFFFF' },
+  secondary: { container: 'bg-surface border border-border',        text: 'text-accent',    iconColor: 'var(--color-accent)' },
+  ghost:     { container: 'bg-transparent',                         text: 'text-accent',    iconColor: 'var(--color-accent)' },
+  // Figma Danger: nền hồng nhạt, chữ đỏ đậm, viền đỏ nhạt
+  danger:    { container: 'bg-[#FFEEEE] border border-[#E2B9B9]',   text: 'text-[#C62626]', iconColor: '#C62626' },
 };
 
 const SIZE: Record<Size, { container: string; text: string }> = {
