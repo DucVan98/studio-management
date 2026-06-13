@@ -25,3 +25,6 @@ storybook-static
 
 # Claude Code: cấu hình cá nhân theo máy
 .claude/settings.local.json
+
+# CodeGraph: index sinh tự động theo máy, không commit
+.codegraph/
