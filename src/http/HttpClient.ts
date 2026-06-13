@@ -268,4 +268,8 @@ export class HttpClient {
 // ── Singleton ─────────────────────────────────────────────────────────────────
 export const httpClient = new HttpClient({
   baseURL: process.env.EXPO_PUBLIC_API_URL ?? '',
+  // Ngrok hiển thị trang cảnh báo trình duyệt nếu thiếu header này — chỉ cần trong dev.
+  headers: process.env.EXPO_PUBLIC_APP_ENV === 'development'
+    ? { 'ngrok-skip-browser-warning': 'true' }
+    : {},
 });
