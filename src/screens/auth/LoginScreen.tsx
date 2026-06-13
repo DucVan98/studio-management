@@ -6,12 +6,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { DIContainer } from '../../di/DIContainer';
+import { EmailUnverifiedError } from '../../domain/errors/AppError';
 import { authActions } from '../../stores/auth.store';
-import { Button, Input } from '../../components/ui';
+import { Button, Input, Alert } from '../../components/ui';
+import type { AlertType } from '../../components/ui';
 import {
   OnboardingScreen,
   OnboardingHeading,
@@ -19,15 +20,19 @@ import {
   SocialAuthButtons,
 } from '../../components/onboarding';
 
+type AlertState = { type: AlertType; title: string; message?: string };
+
 export function LoginScreen() {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState<AlertState | null>(null);
 
   const handleLogin = async () => {
+    setAlert(null);
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Có lỗi xảy ra', 'Vui lòng nhập email và mật khẩu');
+      setAlert({ type: 'error', title: 'Vui lòng nhập email và mật khẩu' });
       return;
     }
 
@@ -36,19 +41,23 @@ export function LoginScreen() {
       const loginUseCase = DIContainer.getInstance().getLoginUseCase();
       const { user, tokens } = await loginUseCase.execute({ email, password });
 
-      // Token đã được AuthSessionService lưu vào SecureStore, AuthHttpClient tự
-      // gắn Bearer — chỉ cần cập nhật store.
       authActions.login(
-        { id: user.id, email: user.email, name: user.name, avatar: user.avatarUrl },
+        { id: user.id, email: user.email, name: user.name, avatar: user.avatarUrl, coupleId: user.coupleId },
         tokens.accessToken,
       );
 
-      navigation.reset({ index: 0, routes: [{ name: 'App' }] });
+      const nextRoute = user.coupleId ? 'App' : 'Invite';
+      navigation.reset({ index: 0, routes: [{ name: nextRoute }] });
     } catch (error) {
-      Alert.alert(
-        'Có lỗi xảy ra',
-        error instanceof Error ? error.message : 'Email hoặc mật khẩu không đúng',
-      );
+      if (EmailUnverifiedError.is(error)) {
+        navigation.navigate('VerifyEmail', { userId: error.userId, email });
+        return;
+      }
+      setAlert({
+        type: 'error',
+        title: 'Đăng nhập thất bại',
+        message: error instanceof Error ? error.message : 'Email hoặc mật khẩu không đúng',
+      });
     } finally {
       setLoading(false);
     }
@@ -67,8 +76,15 @@ export function LoginScreen() {
         >
           <OnboardingHeading title="Đăng nhập" subtitle="Chào mừng trở lại 💕" />
 
+          {/* Alert lỗi — hiện ngay dưới heading */}
+          {alert && (
+            <View className="mt-4">
+              <Alert {...alert} onClose={() => setAlert(null)} />
+            </View>
+          )}
+
           {/* Form */}
-          <View className="gap-4 mt-8">
+          <View className="gap-4 mt-6">
             <Input
               label="Email"
               placeholder="ban@email.com"
@@ -110,11 +126,10 @@ export function LoginScreen() {
           <OrDivider />
 
           <SocialAuthButtons
-            onApple={() => Alert.alert('Sắp ra mắt', 'Đăng nhập với Apple đang được hoàn thiện')}
-            onGoogle={() => Alert.alert('Sắp ra mắt', 'Đăng nhập với Google đang được hoàn thiện')}
+            onApple={() => setAlert({ type: 'info', title: 'Sắp ra mắt', message: 'Đăng nhập với Apple đang được hoàn thiện' })}
+            onGoogle={() => setAlert({ type: 'info', title: 'Sắp ra mắt', message: 'Đăng nhập với Google đang được hoàn thiện' })}
           />
 
-          {/* Footer */}
           <View className="flex-1" />
           <View className="flex-row justify-center mt-8">
             <Text className="text-body-md text-text-muted">Chưa có tài khoản? </Text>

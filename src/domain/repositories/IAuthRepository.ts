@@ -31,6 +31,8 @@ export interface IAuthRepository {
   login(params: LoginParams): Promise<AuthSession>;
   /** POST /auth/refresh — token cũ bị revoke (rotation) */
   refresh(refreshToken: string): Promise<AuthSession>;
+  /** POST /auth/resend-otp — gửi lại mã xác thực email */
+  resendOtp(userId: string): Promise<void>;
   /** POST /auth/forgot-password — luôn 200 (chống email enumeration) */
   forgotPassword(email: string): Promise<void>;
   /** POST /auth/reset-password */

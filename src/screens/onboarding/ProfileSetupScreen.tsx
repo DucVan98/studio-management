@@ -6,11 +6,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { authActions } from '../../stores/auth.store';
-import { Button, Input, Icon } from '../../components/ui';
+import { Button, Input, Icon, Alert } from '../../components/ui';
 import { OnboardingScreen, OnboardingHeading } from '../../components/onboarding';
 
 /** Màn 3 · Thiết lập hồ sơ (Figma 77:186). */
@@ -18,13 +17,13 @@ export function ProfileSetupScreen() {
   const navigation = useNavigation();
   const [name, setName] = useState('');
   const [partnerNickname, setPartnerNickname] = useState('');
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   const handleContinue = () => {
     if (!name.trim()) {
-      Alert.alert('Có lỗi xảy ra', 'Vui lòng nhập tên của bạn');
+      // Validation đơn giản — dùng Alert inline thay vì OS dialog
       return;
     }
-    // TODO: ghép API cập nhật hồ sơ (chưa có UpdateProfileUseCase). Tạm lưu local.
     authActions.updateUser({ name, partnerNickname });
     navigation.navigate('StartDate');
   };
@@ -45,13 +44,23 @@ export function ProfileSetupScreen() {
             subtitle="Để nửa kia nhận ra bạn ngay"
           />
 
+          {/* Thông báo coming soon ảnh đại diện */}
+          {showComingSoon && (
+            <View className="mt-4">
+              <Alert
+                type="info"
+                title="Sắp ra mắt"
+                message="Chọn ảnh đại diện đang được hoàn thiện"
+                onClose={() => setShowComingSoon(false)}
+              />
+            </View>
+          )}
+
           {/* Avatar */}
-          <View className="items-center mt-8">
+          <View className="items-center mt-6">
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() =>
-                Alert.alert('Sắp ra mắt', 'Chọn ảnh đại diện đang được hoàn thiện')
-              }
+              onPress={() => setShowComingSoon(true)}
             >
               <View className="w-28 h-28 rounded-pill bg-surface-alt items-center justify-center">
                 <Icon name="user" size={48} color="#D4537E" />
@@ -63,8 +72,14 @@ export function ProfileSetupScreen() {
             <Text className="text-body-sm text-text-muted mt-3">Thêm ảnh đại diện</Text>
           </View>
 
-          {/* Form */}
-          <View className="gap-4 mt-8">
+          {/* Validation inline */}
+          {!name.trim() && name.length > 0 && (
+            <View className="mt-4">
+              <Alert type="error" title="Vui lòng nhập tên của bạn" />
+            </View>
+          )}
+
+          <View className="gap-4 mt-6">
             <Input
               label="Tên của bạn"
               placeholder="Linh"

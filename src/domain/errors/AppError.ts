@@ -51,3 +51,21 @@ export class AppError extends Error {
     return this.kind === 'forbidden' && this.message.includes('couple required');
   }
 }
+
+/**
+ * Lỗi đặc biệt khi email tồn tại nhưng chưa xác thực.
+ * Mang thêm `userId` để client redirect thẳng sang màn OTP.
+ */
+export class EmailUnverifiedError extends AppError {
+  readonly userId: string;
+
+  constructor(message: string, userId: string) {
+    super(message, 'forbidden', { code: 'EMAIL_UNVERIFIED' });
+    this.name = 'EmailUnverifiedError';
+    this.userId = userId;
+  }
+
+  static is(error: unknown): error is EmailUnverifiedError {
+    return error instanceof EmailUnverifiedError;
+  }
+}

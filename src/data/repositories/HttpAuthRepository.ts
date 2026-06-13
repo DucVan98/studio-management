@@ -58,6 +58,10 @@ export class HttpAuthRepository implements IAuthRepository {
     );
   }
 
+  resendOtp(userId: string): Promise<void> {
+    return guard(() => this.dataSource.resendOtp({ user_id: userId }));
+  }
+
   logout(refreshToken: string): Promise<void> {
     return guard(() => this.dataSource.logout(refreshToken));
   }

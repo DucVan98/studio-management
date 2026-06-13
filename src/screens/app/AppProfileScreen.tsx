@@ -1,14 +1,17 @@
-import { View, Text, TouchableOpacity, Alert, Image } from 'react-native';
+import { useState } from 'react';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useValue } from '@legendapp/state/react';
 import { useNavigation } from '@react-navigation/native';
 import { authStore$, authActions } from '../../stores/auth.store';
+import { ConfirmModal } from '../../components/ui';
 
 export function AppProfileScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const user = useValue(authStore$.user);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const menuItems = [
     { id: '1', icon: '✏️', label: t('profile.editProfile') },
@@ -18,18 +21,10 @@ export function AppProfileScreen() {
     { id: '5', icon: 'ℹ️', label: t('profile.about') },
   ];
 
-  const handleLogout = () => {
-    Alert.alert(t('auth.logout'), t('profile.logoutConfirm'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('auth.logout'),
-        style: 'destructive',
-        onPress: () => {
-          authActions.logout();
-          navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-        },
-      },
-    ]);
+  const handleLogoutConfirm = () => {
+    setShowLogoutModal(false);
+    authActions.logout();
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
   return (
@@ -69,16 +64,29 @@ export function AppProfileScreen() {
           ))}
         </View>
 
-        {/* Logout */}
+        {/* Nút đăng xuất — mở ConfirmModal thay vì OS Alert */}
         <TouchableOpacity
           className="mt-6 h-12 rounded-xl bg-error/10 items-center justify-center"
-          onPress={handleLogout}
+          onPress={() => setShowLogoutModal(true)}
           activeOpacity={0.8}
         >
           <Text className="text-error font-semibold text-body-md">{t('auth.logout')}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modal xác nhận đăng xuất */}
+      <ConfirmModal
+        visible={showLogoutModal}
+        iconName="x"
+        iconType="error"
+        title={t('auth.logout')}
+        message={t('profile.logoutConfirm')}
+        confirmLabel={t('auth.logout')}
+        confirmVariant="danger"
+        cancelLabel={t('common.cancel')}
+        onConfirm={handleLogoutConfirm}
+        onCancel={() => setShowLogoutModal(false)}
+      />
     </SafeAreaView>
   );
 }
-

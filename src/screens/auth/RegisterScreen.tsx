@@ -6,12 +6,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { DIContainer } from '../../di/DIContainer';
-import { Button, Input } from '../../components/ui';
+import { EmailUnverifiedError } from '../../domain/errors/AppError';
+import { Button, Input, Alert } from '../../components/ui';
+import type { AlertType } from '../../components/ui';
 import {
   OnboardingScreen,
   OnboardingHeading,
@@ -19,38 +20,43 @@ import {
   SocialAuthButtons,
 } from '../../components/onboarding';
 
+type AlertState = { type: AlertType; title: string; message?: string };
+
 export function RegisterScreen() {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState<AlertState | null>(null);
 
   const handleRegister = async () => {
+    setAlert(null);
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Có lỗi xảy ra', 'Vui lòng nhập email và mật khẩu');
+      setAlert({ type: 'error', title: 'Vui lòng nhập email và mật khẩu' });
       return;
     }
     if (password !== confirm) {
-      Alert.alert('Có lỗi xảy ra', 'Mật khẩu xác nhận không khớp');
+      setAlert({ type: 'error', title: 'Mật khẩu xác nhận không khớp' });
       return;
     }
 
     setLoading(true);
     try {
       const registerUseCase = DIContainer.getInstance().getRegisterUseCase();
-      // Tên hiển thị được nhập ở bước "Thiết lập hồ sơ"; tạm dùng phần trước @.
-      // slice(0, 50): local part email có thể dài hơn giới hạn 50 ký tự của name.
       const name = (email.trim().split('@')[0] || 'Bạn').slice(0, 50);
       const { userId } = await registerUseCase.execute({ name, email, password });
-
-      // Đăng ký KHÔNG trả token — chuyển sang nhập OTP để xác thực email.
       navigation.navigate('VerifyEmail', { userId, email });
     } catch (error) {
-      Alert.alert(
-        'Có lỗi xảy ra',
-        error instanceof Error ? error.message : 'Không thể tạo tài khoản',
-      );
+      if (EmailUnverifiedError.is(error)) {
+        navigation.navigate('VerifyEmail', { userId: error.userId, email });
+        return;
+      }
+      setAlert({
+        type: 'error',
+        title: 'Đăng ký thất bại',
+        message: error instanceof Error ? error.message : 'Không thể tạo tài khoản',
+      });
     } finally {
       setLoading(false);
     }
@@ -72,8 +78,13 @@ export function RegisterScreen() {
             subtitle="Bắt đầu hành trình của hai bạn 💕"
           />
 
-          {/* Form */}
-          <View className="gap-4 mt-8">
+          {alert && (
+            <View className="mt-4">
+              <Alert {...alert} onClose={() => setAlert(null)} />
+            </View>
+          )}
+
+          <View className="gap-4 mt-6">
             <Input
               label="Email"
               placeholder="ban@email.com"
@@ -115,11 +126,10 @@ export function RegisterScreen() {
           <OrDivider />
 
           <SocialAuthButtons
-            onApple={() => Alert.alert('Sắp ra mắt', 'Đăng ký với Apple đang được hoàn thiện')}
-            onGoogle={() => Alert.alert('Sắp ra mắt', 'Đăng ký với Google đang được hoàn thiện')}
+            onApple={() => setAlert({ type: 'info', title: 'Sắp ra mắt', message: 'Đăng ký với Apple đang được hoàn thiện' })}
+            onGoogle={() => setAlert({ type: 'info', title: 'Sắp ra mắt', message: 'Đăng ký với Google đang được hoàn thiện' })}
           />
 
-          {/* Terms */}
           <Text className="text-body-sm text-text-muted text-center mt-6 px-2">
             Bằng việc tiếp tục, bạn đồng ý với{' '}
             <Text

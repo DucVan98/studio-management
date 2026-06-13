@@ -48,6 +48,8 @@ export interface CoupleActivity {
 export interface CoupleInvite {
   id: string;
   inviterId: string;
+  /** Tên người mời — có khi gọi GET /invite/:code */
+  inviterName?: string;
   code: string;
   expiresAt: string;
   acceptedAt?: string;
