@@ -32,7 +32,9 @@ export function RootNavigator({ initialRouteName }: { initialRouteName: keyof Ro
       <Stack.Screen name="EnterCode" component={EnterCodeScreen} />
       <Stack.Screen name="PartnerAccept" component={PartnerAcceptScreen} />
       <Stack.Screen name="Connected" component={ConnectedScreen} />
-      <Stack.Screen name="App" component={AppTabs} />
+      {/* Vào main app bằng fade — tránh hiệu ứng trượt gây cảm giác nội
+          dung "chạy" khi reset từ onboarding/boot sang Home */}
+      <Stack.Screen name="App" component={AppTabs} options={{ animation: 'fade' }} />
     </Stack.Navigator>
   );
 }

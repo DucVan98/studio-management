@@ -24,6 +24,7 @@ export { CountdownCard } from './CountdownCard';
 export { EmptyState } from './EmptyState';
 export { ProgressBar } from './ProgressBar';
 export { Skeleton } from './Skeleton';
+export { Screen } from './Screen';
 export { ScreenHeader } from './ScreenHeader';
 export { SectionHeader } from './SectionHeader';
 

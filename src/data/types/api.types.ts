@@ -120,6 +120,8 @@ export interface CoupleInviteDto {
   inviter_id: string;
   /** Tên người mời — backend embed vào response của GET /invite/:code */
   inviter_name?: string;
+  /** Avatar người mời — hiển thị ở màn PartnerAccept */
+  inviter_avatar_url?: string;
   code: string;
   expires_at: string;
   accepted_at?: string;

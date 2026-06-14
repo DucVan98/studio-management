@@ -19,6 +19,7 @@ import {
   prepareHeaders,
   serializeBody,
 } from './utils/url';
+import { xhrFetch } from './utils/xhrFetch';
 
 const DEFAULT_TIMEOUT = 30_000;
 const DEFAULT_HEADERS: HttpHeaders = {
@@ -192,11 +193,15 @@ export class HttpClient {
         | FormData
         | undefined;
 
+      // FormData (upload file theo uri) → dùng XHR vì expo/fetch không hỗ trợ
+      // file-part { uri, name, type }. Còn lại dùng fetch global như cũ.
+      const send =
+        body instanceof FormData
+          ? () => xhrFetch(url, { method, headers, body, signal })
+          : () => fetch(url, { method, headers, body, signal } as RequestInit);
+
       // Cast: types FormData/AbortSignal của RN khác lib chuẩn nhưng runtime tương thích
-      const raw = await Promise.race([
-        fetch(url, { method, headers, body, signal } as RequestInit),
-        hardTimeout,
-      ]);
+      const raw = await Promise.race([send(), hardTimeout]);
       clearTimeout(timeoutId);
 
       if (!isSuccessStatus(raw.status)) {

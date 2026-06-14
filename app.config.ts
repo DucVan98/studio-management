@@ -68,6 +68,15 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       'expo-localization',
       'expo-secure-store',
       [
+        'expo-image-picker',
+        {
+          photosPermission:
+            'Cho phép Everly truy cập thư viện ảnh để chọn ảnh đại diện và ảnh kỷ niệm.',
+          cameraPermission:
+            'Cho phép Everly dùng camera để chụp ảnh đại diện và ảnh kỷ niệm.',
+        },
+      ],
+      [
         '@ducanh261101a/react-native-nitro-splash',
         {
           autoShow: true,

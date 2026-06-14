@@ -50,6 +50,8 @@ export interface CoupleInvite {
   inviterId: string;
   /** Tên người mời — có khi gọi GET /invite/:code */
   inviterName?: string;
+  /** Avatar người mời — có khi gọi GET /invite/:code */
+  inviterAvatarUrl?: string;
   code: string;
   expiresAt: string;
   acceptedAt?: string;
