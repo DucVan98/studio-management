@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useValue } from '@legendapp/state/react';
 import { useNavigation } from '@react-navigation/native';
 import { authStore$, authActions } from '../../stores/auth.store';
-import { ConfirmModal } from '../../components/ui';
+import { ConfirmModal, Screen } from '../../components/ui';
 
 export function AppProfileScreen() {
   const { t } = useTranslation();
@@ -28,7 +27,7 @@ export function AppProfileScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-bg">
+    <Screen>
       <View className="flex-1 p-6">
         {/* Avatar + User info */}
         <View className="items-center py-8">
@@ -87,6 +86,6 @@ export function AppProfileScreen() {
         onConfirm={handleLogoutConfirm}
         onCancel={() => setShowLogoutModal(false)}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }
