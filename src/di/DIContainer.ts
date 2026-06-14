@@ -1,5 +1,7 @@
 import { AuthHttpClient } from '../http';
 import { SecureTokenStorage } from '../services/SecureTokenStorage';
+import { ExpoImagePicker } from '../services/imagePicker/ExpoImagePicker';
+import type { IImagePicker } from '../services/imagePicker/IImagePicker';
 import { AuthSessionService } from '../services/AuthSessionService';
 import { InviteSSEClient } from '../services/InviteSSEClient';
 import type { IInviteSSEClient } from '../services/InviteSSEClient';
@@ -8,6 +10,7 @@ import type { IInviteSSEClient } from '../services/InviteSSEClient';
 import { HttpAuthDataSource } from '../data/datasources/HttpAuthDataSource';
 import { HttpCoupleDataSource } from '../data/datasources/HttpCoupleDataSource';
 import { HttpMemoryDataSource } from '../data/datasources/HttpMemoryDataSource';
+import { HttpUserDataSource } from '../data/datasources/HttpUserDataSource';
 import { HttpMilestoneDataSource } from '../data/datasources/HttpMilestoneDataSource';
 import { HttpNotificationDataSource } from '../data/datasources/HttpNotificationDataSource';
 import { HttpSubscriptionDataSource } from '../data/datasources/HttpSubscriptionDataSource';
@@ -16,12 +19,14 @@ import { HttpSubscriptionDataSource } from '../data/datasources/HttpSubscription
 import { HttpAuthRepository } from '../data/repositories/HttpAuthRepository';
 import { HttpCoupleRepository } from '../data/repositories/HttpCoupleRepository';
 import { HttpMemoryRepository } from '../data/repositories/HttpMemoryRepository';
+import { HttpUserRepository } from '../data/repositories/HttpUserRepository';
 import { HttpMilestoneRepository } from '../data/repositories/HttpMilestoneRepository';
 import { HttpNotificationRepository } from '../data/repositories/HttpNotificationRepository';
 import { HttpSubscriptionRepository } from '../data/repositories/HttpSubscriptionRepository';
 import type { IAuthRepository } from '../domain/repositories/IAuthRepository';
 import type { ICoupleRepository } from '../domain/repositories/ICoupleRepository';
 import type { IMemoryRepository } from '../domain/repositories/IMemoryRepository';
+import type { IUserRepository } from '../domain/repositories/IUserRepository';
 import type { IMilestoneRepository } from '../domain/repositories/IMilestoneRepository';
 import type { INotificationRepository } from '../domain/repositories/INotificationRepository';
 import type { ISubscriptionRepository } from '../domain/repositories/ISubscriptionRepository';
@@ -70,6 +75,9 @@ import { DeleteMemoryUseCase } from '../domain/usecases/memory/DeleteMemoryUseCa
 import { UploadMemoryMediaUseCase } from '../domain/usecases/memory/UploadMemoryMediaUseCase';
 import { DeleteMemoryMediaUseCase } from '../domain/usecases/memory/DeleteMemoryMediaUseCase';
 
+// ── Use cases: User ───────────────────────────────────────────────────────────
+import { UploadAvatarUseCase } from '../domain/usecases/user/UploadAvatarUseCase';
+
 // ── Use cases: Milestone ──────────────────────────────────────────────────────
 import { GetMilestonesUseCase } from '../domain/usecases/milestone/GetMilestonesUseCase';
 import { GetUpcomingMilestonesUseCase } from '../domain/usecases/milestone/GetUpcomingMilestonesUseCase';
@@ -112,6 +120,8 @@ export class DIContainer {
   private _coupleRepository?: ICoupleRepository;
   private _inviteSSEClient?: IInviteSSEClient;
   private _memoryRepository?: IMemoryRepository;
+  private _userRepository?: IUserRepository;
+  private _imagePicker?: IImagePicker;
   private _milestoneRepository?: IMilestoneRepository;
   private _notificationRepository?: INotificationRepository;
   private _subscriptionRepository?: ISubscriptionRepository;
@@ -169,6 +179,17 @@ export class DIContainer {
   getMemoryRepository(): IMemoryRepository {
     this._memoryRepository ??= new HttpMemoryRepository(new HttpMemoryDataSource(this.http));
     return this._memoryRepository;
+  }
+
+  getUserRepository(): IUserRepository {
+    this._userRepository ??= new HttpUserRepository(new HttpUserDataSource(this.http));
+    return this._userRepository;
+  }
+
+  /** Adapter chọn ảnh — UI chỉ phụ thuộc interface IImagePicker. */
+  getImagePicker(): IImagePicker {
+    this._imagePicker ??= new ExpoImagePicker();
+    return this._imagePicker;
   }
 
   getMilestoneRepository(): IMilestoneRepository {
@@ -242,6 +263,7 @@ export class DIContainer {
   getDeleteMemoryUseCase() { return new DeleteMemoryUseCase(this.getMemoryRepository()); }
   getUploadMemoryMediaUseCase() { return new UploadMemoryMediaUseCase(this.getMemoryRepository()); }
   getDeleteMemoryMediaUseCase() { return new DeleteMemoryMediaUseCase(this.getMemoryRepository()); }
+  getUploadAvatarUseCase() { return new UploadAvatarUseCase(this.getUserRepository()); }
 
   // ── Milestone Use Cases ───────────────────────────────────────────────────
 

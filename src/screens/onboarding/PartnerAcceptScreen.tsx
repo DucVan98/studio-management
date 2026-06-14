@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { DIContainer } from '../../di/DIContainer';
@@ -19,7 +19,10 @@ export function PartnerAcceptScreen() {
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const inviter = inviterName ?? 'Người ấy';
+  // Tên/avatar người mời: ưu tiên dữ liệu fetch từ invite, fallback route param
+  const [inviterDisplay, setInviterDisplay] = useState<string | null>(inviterName ?? null);
+  const [inviterAvatar, setInviterAvatar] = useState<string | null>(null);
+  const inviter = inviterDisplay ?? 'Người ấy';
 
   // Vào qua deep link/QR nhưng chưa đăng nhập → lưu code, đẩy về Welcome.
   // Sau khi đăng nhập/đăng ký xong sẽ tự quay lại màn này (xem ProfileSetup/Login).
@@ -43,6 +46,8 @@ export function PartnerAcceptScreen() {
           const date = invite.startDate ?? invite.createdAt.slice(0, 10);
           setStartDate(date);
           setDaysTogether(Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 86_400_000)));
+          if (invite.inviterName) setInviterDisplay(invite.inviterName);
+          if (invite.inviterAvatarUrl) setInviterAvatar(invite.inviterAvatarUrl);
         }
       })
       .catch(() => {
@@ -90,10 +95,14 @@ export function PartnerAcceptScreen() {
 
         {/* Avatars */}
         <View className="flex-row items-center justify-center gap-3 mt-8">
-          <View className="w-20 h-20 rounded-pill bg-accent items-center justify-center">
-            <Text className="font-serif text-heading-xl text-on-accent">
-              {inviter.charAt(0).toUpperCase()}
-            </Text>
+          <View className="w-20 h-20 rounded-pill bg-accent items-center justify-center overflow-hidden">
+            {inviterAvatar ? (
+              <Image source={{ uri: inviterAvatar }} className="w-full h-full" resizeMode="cover" />
+            ) : (
+              <Text className="font-serif text-heading-xl text-on-accent">
+                {inviter.charAt(0).toUpperCase()}
+              </Text>
+            )}
           </View>
           <Icon name="heart" size={28} color="#D4537E" />
           <View className="w-20 h-20 rounded-pill bg-surface-alt items-center justify-center">

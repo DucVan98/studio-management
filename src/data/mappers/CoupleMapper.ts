@@ -66,6 +66,7 @@ export function mapCoupleInvite(dto: CoupleInviteDto): CoupleInvite {
     id: dto.id,
     inviterId: dto.inviter_id,
     inviterName: dto.inviter_name,
+    inviterAvatarUrl: dto.inviter_avatar_url,
     code: dto.code,
     expiresAt: dto.expires_at,
     acceptedAt: dto.accepted_at,
