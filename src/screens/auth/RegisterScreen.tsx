@@ -22,6 +22,22 @@ import {
 
 type AlertState = { type: AlertType; title: string; message?: string };
 
+/** Dòng điều khoản & chính sách bảo mật với link mở trình duyệt. */
+function TermsNotice() {
+  return (
+    <Text className="text-body-sm text-text-muted text-center mt-6 px-2">
+      Bằng việc tiếp tục, bạn đồng ý với{' '}
+      <Text className="text-accent" onPress={() => Linking.openURL('https://everly.app/terms')}>
+        Điều khoản
+      </Text>{' '}
+      &amp;{' '}
+      <Text className="text-accent" onPress={() => Linking.openURL('https://everly.app/privacy')}>
+        Chính sách bảo mật
+      </Text>
+    </Text>
+  );
+}
+
 export function RegisterScreen() {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
@@ -130,22 +146,7 @@ export function RegisterScreen() {
             onGoogle={() => setAlert({ type: 'info', title: 'Sắp ra mắt', message: 'Đăng ký với Google đang được hoàn thiện' })}
           />
 
-          <Text className="text-body-sm text-text-muted text-center mt-6 px-2">
-            Bằng việc tiếp tục, bạn đồng ý với{' '}
-            <Text
-              className="text-accent"
-              onPress={() => Linking.openURL('https://everly.app/terms')}
-            >
-              Điều khoản
-            </Text>{' '}
-            &amp;{' '}
-            <Text
-              className="text-accent"
-              onPress={() => Linking.openURL('https://everly.app/privacy')}
-            >
-              Chính sách bảo mật
-            </Text>
-          </Text>
+          <TermsNotice />
 
           <View className="flex-1" />
           <View className="flex-row justify-center mt-8">

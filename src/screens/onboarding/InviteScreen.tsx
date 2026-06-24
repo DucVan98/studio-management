@@ -8,6 +8,28 @@ import { OnboardingScreen } from '../../components/onboarding';
 import { onboardingStore$, onboardingActions } from '../../stores/onboarding.store';
 import { buildInviteLink } from '../../config/links';
 
+/** Ô QR: hiển thị lỗi / mã QR / spinner tuỳ trạng thái tạo invite. */
+function InviteQrBox({ code, error }: { code: string | null; error: boolean }) {
+  return (
+    <View className="items-center mt-8">
+      <View className="w-[220px] h-[220px] bg-surface rounded-md items-center justify-center p-5">
+        {error ? (
+          <Text className="text-body-sm text-error text-center">
+            Không tạo được mã mời. Thử lại sau.
+          </Text>
+        ) : code ? (
+          <>
+            <QRCode value={buildInviteLink(code)} size={140} color="#6B1A1A" backgroundColor="white" />
+            <Text className="text-body-sm text-text-muted mt-3">Quét để kết nối</Text>
+          </>
+        ) : (
+          <ActivityIndicator color="#D4537E" />
+        )}
+      </View>
+    </View>
+  );
+}
+
 /** Màn 5 · Mời nửa kia (Figma 9:2). */
 export function InviteScreen() {
   const navigation = useNavigation();
@@ -98,27 +120,7 @@ export function InviteScreen() {
         </Text>
 
         {/* QR */}
-        <View className="items-center mt-8">
-          <View className="w-[220px] h-[220px] bg-surface rounded-md items-center justify-center p-5">
-            {error ? (
-              <Text className="text-body-sm text-error text-center">
-                Không tạo được mã mời. Thử lại sau.
-              </Text>
-            ) : code ? (
-              <>
-                <QRCode
-                  value={buildInviteLink(code)}
-                  size={140}
-                  color="#6B1A1A"
-                  backgroundColor="white"
-                />
-                <Text className="text-body-sm text-text-muted mt-3">Quét để kết nối</Text>
-              </>
-            ) : (
-              <ActivityIndicator color="#D4537E" />
-            )}
-          </View>
-        </View>
+        <InviteQrBox code={code} error={error} />
 
         {/* hoặc */}
         <View className="flex-row items-center my-6">

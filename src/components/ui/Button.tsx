@@ -56,6 +56,33 @@ const SIZE: Record<Size, { container: string; text: string }> = {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const PRESS_SPRING = { damping: 15, stiffness: 320 } as const;
 
+/** Nội dung trong nút: spinner/leftIcon + label + rightIcon. Tách ra để giảm
+ *  complexity của Button (tránh lồng nhiều ternary trong JSX chính). */
+function ButtonContent({
+  label, loading, leftIcon, rightIcon, textClass, iconColor,
+}: {
+  label: string;
+  loading: boolean;
+  leftIcon?: IconName;
+  rightIcon?: IconName;
+  textClass: string;
+  iconColor: string;
+}) {
+  return (
+    <>
+      {loading ? (
+        <ActivityIndicator size="small" color={iconColor} />
+      ) : leftIcon ? (
+        <Icon name={leftIcon} size="sm" color={iconColor} />
+      ) : null}
+      <Text className={textClass}>{label}</Text>
+      {rightIcon && !loading && (
+        <Icon name={rightIcon} size="sm" color={iconColor} />
+      )}
+    </>
+  );
+}
+
 export function Button({
   label,
   variant = 'primary',
@@ -105,15 +132,14 @@ export function Button({
       onPressOut={handlePressOut}
       {...rest}
     >
-      {loading ? (
-        <ActivityIndicator size="small" color={v.iconColor} />
-      ) : leftIcon ? (
-        <Icon name={leftIcon} size="sm" color={v.iconColor} />
-      ) : null}
-      <Text className={`${s.text} ${v.text}`}>{label}</Text>
-      {rightIcon && !loading && (
-        <Icon name={rightIcon} size="sm" color={v.iconColor} />
-      )}
+      <ButtonContent
+        label={label}
+        loading={!!loading}
+        leftIcon={leftIcon}
+        rightIcon={rightIcon}
+        textClass={`${s.text} ${v.text}`}
+        iconColor={v.iconColor}
+      />
     </AnimatedPressable>
   );
 }

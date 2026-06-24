@@ -28,6 +28,9 @@ export type RootStackParamList = {
 declare global {
    
   namespace ReactNavigation {
+    // Pattern chuẩn của React Navigation: phải dùng interface rỗng để merge
+    // RootStackParamList vào RootParamList toàn cục cho useNavigation()/useRoute().
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface RootParamList extends RootStackParamList {}
   }
 }

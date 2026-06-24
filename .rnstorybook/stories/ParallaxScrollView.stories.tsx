@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-native';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 
 import {
   ParallaxScrollView,

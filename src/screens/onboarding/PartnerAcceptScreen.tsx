@@ -11,6 +11,63 @@ import type { RootStackParamList } from '../../navigation/types';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
+/** Cặp avatar người mời ↔ bạn, ngăn cách bằng icon tim. */
+function InviterAvatars({ inviter, inviterAvatar }: { inviter: string; inviterAvatar: string | null }) {
+  return (
+    <View className="flex-row items-center justify-center gap-3 mt-8">
+      <View className="w-20 h-20 rounded-pill bg-accent items-center justify-center overflow-hidden">
+        {inviterAvatar ? (
+          <Image source={{ uri: inviterAvatar }} className="w-full h-full" resizeMode="cover" />
+        ) : (
+          <Text className="font-serif text-heading-xl text-on-accent">
+            {inviter.charAt(0).toUpperCase()}
+          </Text>
+        )}
+      </View>
+      <Icon name="heart" size={28} color="#D4537E" />
+      <View className="w-20 h-20 rounded-pill bg-surface-alt items-center justify-center">
+        <Icon name="user" size={36} color="#D4537E" />
+      </View>
+    </View>
+  );
+}
+
+/** Thẻ thông tin: người mời + ngày bắt đầu (kèm số ngày yêu nếu có). */
+function InviteInfoCard({
+  inviter, startDate, daysTogether,
+}: {
+  inviter: string;
+  startDate: string | null;
+  daysTogether: number | null;
+}) {
+  return (
+    <View className="bg-surface rounded-md p-5 mt-4 gap-4">
+      <View className="flex-row items-center gap-3">
+        <Icon name="user" size="md" color="#B07A86" />
+        <View>
+          <Text className="text-body-sm text-text-muted">Người mời</Text>
+          <Text className="text-body-md text-text mt-0.5">{inviter}</Text>
+        </View>
+      </View>
+      <View className="flex-row items-center gap-3">
+        <Icon name="calendar" size="md" color="#B07A86" />
+        <View>
+          <Text className="text-body-sm text-text-muted">Ngày bắt đầu</Text>
+          <Text className="text-body-md text-text mt-0.5">
+            {startDate
+              ? `${startDate.split('-').reverse().join(' . ')}${
+                  daysTogether !== null
+                    ? ` (${daysTogether.toLocaleString('vi-VN')} ngày)`
+                    : ''
+                }`
+              : 'Đang tải...'}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 /** Màn 6 · Partner xác nhận lời mời (Figma 79:204). Vào qua deep link join/:code */
 export function PartnerAcceptScreen() {
   const navigation = useNavigation();
@@ -94,21 +151,7 @@ export function PartnerAcceptScreen() {
         </View>
 
         {/* Avatars */}
-        <View className="flex-row items-center justify-center gap-3 mt-8">
-          <View className="w-20 h-20 rounded-pill bg-accent items-center justify-center overflow-hidden">
-            {inviterAvatar ? (
-              <Image source={{ uri: inviterAvatar }} className="w-full h-full" resizeMode="cover" />
-            ) : (
-              <Text className="font-serif text-heading-xl text-on-accent">
-                {inviter.charAt(0).toUpperCase()}
-              </Text>
-            )}
-          </View>
-          <Icon name="heart" size={28} color="#D4537E" />
-          <View className="w-20 h-20 rounded-pill bg-surface-alt items-center justify-center">
-            <Icon name="user" size={36} color="#D4537E" />
-          </View>
-        </View>
+        <InviterAvatars inviter={inviter} inviterAvatar={inviterAvatar} />
 
         <Text className="font-serif text-heading-xl text-text text-center mt-8 px-2">
           {inviter} muốn bắt đầu hành trình Everly cùng bạn
@@ -124,30 +167,7 @@ export function PartnerAcceptScreen() {
         )}
 
         {/* Info card */}
-        <View className="bg-surface rounded-md p-5 mt-4 gap-4">
-          <View className="flex-row items-center gap-3">
-            <Icon name="user" size="md" color="#B07A86" />
-            <View>
-              <Text className="text-body-sm text-text-muted">Người mời</Text>
-              <Text className="text-body-md text-text mt-0.5">{inviter}</Text>
-            </View>
-          </View>
-          <View className="flex-row items-center gap-3">
-            <Icon name="calendar" size="md" color="#B07A86" />
-            <View>
-              <Text className="text-body-sm text-text-muted">Ngày bắt đầu</Text>
-              <Text className="text-body-md text-text mt-0.5">
-                {startDate
-                  ? `${startDate.split('-').reverse().join(' . ')}${
-                      daysTogether !== null
-                        ? ` (${daysTogether.toLocaleString('vi-VN')} ngày)`
-                        : ''
-                    }`
-                  : 'Đang tải...'}
-              </Text>
-            </View>
-          </View>
-        </View>
+        <InviteInfoCard inviter={inviter} startDate={startDate} daysTogether={daysTogether} />
 
         <View className="flex-1" />
 

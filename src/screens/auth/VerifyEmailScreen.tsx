@@ -20,6 +20,39 @@ const RESEND_SECONDS = 45;
 
 type AlertState = { type: AlertType; title: string; message?: string };
 
+/** Dãy ô OTP + TextInput ẩn phủ lên trên để nhận nhập liệu. */
+function OtpBoxes({
+  code, onChange, inputRef,
+}: {
+  code: string;
+  onChange: (text: string) => void;
+  inputRef: React.RefObject<TextInput | null>;
+}) {
+  return (
+    <Pressable className="flex-row justify-center gap-2 mt-6" onPress={() => inputRef.current?.focus()}>
+      {Array.from({ length: OTP_LENGTH }).map((_, i) => (
+        <View
+          key={i}
+          className={`w-12 h-14 rounded-md border items-center justify-center bg-surface ${
+            i === code.length ? 'border-accent' : 'border-border'
+          }`}
+        >
+          <Text className="text-heading-lg font-bold text-text">{i < code.length ? code[i] : ''}</Text>
+        </View>
+      ))}
+      <TextInput
+        ref={inputRef}
+        value={code}
+        onChangeText={onChange}
+        keyboardType="number-pad"
+        maxLength={OTP_LENGTH}
+        autoFocus
+        className="absolute opacity-0 w-full h-14"
+      />
+    </Pressable>
+  );
+}
+
 /** Màn Xác thực email — OTP 6 số (Figma 176:981). */
 export function VerifyEmailScreen() {
   const navigation = useNavigation();
@@ -116,36 +149,7 @@ export function VerifyEmailScreen() {
         )}
 
         {/* OTP boxes */}
-        <Pressable
-          className="flex-row justify-center gap-2 mt-6"
-          onPress={() => inputRef.current?.focus()}
-        >
-          {Array.from({ length: OTP_LENGTH }).map((_, i) => {
-            const filled = i < code.length;
-            const active = i === code.length;
-            return (
-              <View
-                key={i}
-                className={`w-12 h-14 rounded-md border items-center justify-center bg-surface ${
-                  active ? 'border-accent' : 'border-border'
-                }`}
-              >
-                <Text className="text-heading-lg font-bold text-text">
-                  {filled ? code[i] : ''}
-                </Text>
-              </View>
-            );
-          })}
-          <TextInput
-            ref={inputRef}
-            value={code}
-            onChangeText={onChange}
-            keyboardType="number-pad"
-            maxLength={OTP_LENGTH}
-            autoFocus
-            className="absolute opacity-0 w-full h-14"
-          />
-        </Pressable>
+        <OtpBoxes code={code} onChange={onChange} inputRef={inputRef} />
 
         {/* Resend */}
         <View className="items-center mt-5">
