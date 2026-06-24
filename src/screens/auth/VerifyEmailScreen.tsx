@@ -1,16 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  Pressable,
-} from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { DIContainer } from '../../di/DIContainer';
 import { authActions } from '../../stores/auth.store';
-import { Button, Icon, Alert } from '../../components/ui';
+import { Button, Icon, Alert, OtpInput } from '../../components/ui';
 import type { AlertType } from '../../components/ui';
 import { OnboardingScreen } from '../../components/onboarding';
 import type { RootStackParamList } from '../../navigation/types';
@@ -20,39 +14,6 @@ const RESEND_SECONDS = 45;
 
 type AlertState = { type: AlertType; title: string; message?: string };
 
-/** Dãy ô OTP + TextInput ẩn phủ lên trên để nhận nhập liệu. */
-function OtpBoxes({
-  code, onChange, inputRef,
-}: {
-  code: string;
-  onChange: (text: string) => void;
-  inputRef: React.RefObject<TextInput | null>;
-}) {
-  return (
-    <Pressable className="flex-row justify-center gap-2 mt-6" onPress={() => inputRef.current?.focus()}>
-      {Array.from({ length: OTP_LENGTH }).map((_, i) => (
-        <View
-          key={i}
-          className={`w-12 h-14 rounded-md border items-center justify-center bg-surface ${
-            i === code.length ? 'border-accent' : 'border-border'
-          }`}
-        >
-          <Text className="text-heading-lg font-bold text-text">{i < code.length ? code[i] : ''}</Text>
-        </View>
-      ))}
-      <TextInput
-        ref={inputRef}
-        value={code}
-        onChangeText={onChange}
-        keyboardType="number-pad"
-        maxLength={OTP_LENGTH}
-        autoFocus
-        className="absolute opacity-0 w-full h-14"
-      />
-    </Pressable>
-  );
-}
-
 /** Màn Xác thực email — OTP 6 số (Figma 176:981). */
 export function VerifyEmailScreen() {
   const navigation = useNavigation();
@@ -61,7 +22,6 @@ export function VerifyEmailScreen() {
   const [loading, setLoading] = useState(false);
   const [seconds, setSeconds] = useState(RESEND_SECONDS);
   const [alert, setAlert] = useState<AlertState | null>(null);
-  const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     if (seconds <= 0) return;
@@ -148,8 +108,10 @@ export function VerifyEmailScreen() {
           </View>
         )}
 
-        {/* OTP boxes */}
-        <OtpBoxes code={code} onChange={onChange} inputRef={inputRef} />
+        {/* OTP boxes — ô fill có pop animation + ô đang chờ được làm nổi */}
+        <View className="items-center mt-6">
+          <OtpInput value={code} onChange={onChange} length={OTP_LENGTH} autoFocus />
+        </View>
 
         {/* Resend */}
         <View className="items-center mt-5">
