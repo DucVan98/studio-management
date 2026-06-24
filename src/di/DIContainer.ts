@@ -2,6 +2,9 @@ import { AuthHttpClient } from '../http';
 import { SecureTokenStorage } from '../services/SecureTokenStorage';
 import { ExpoImagePicker } from '../services/imagePicker/ExpoImagePicker';
 import type { IImagePicker } from '../services/imagePicker/IImagePicker';
+import { ExpoHaptics } from '../services/haptics/ExpoHaptics';
+import { NoopHaptics } from '../services/haptics/NoopHaptics';
+import type { IHaptics } from '../services/haptics/IHaptics';
 import { AuthSessionService } from '../services/AuthSessionService';
 import { InviteSSEClient } from '../services/InviteSSEClient';
 import type { IInviteSSEClient } from '../services/InviteSSEClient';
@@ -122,6 +125,7 @@ export class DIContainer {
   private _memoryRepository?: IMemoryRepository;
   private _userRepository?: IUserRepository;
   private _imagePicker?: IImagePicker;
+  private _haptics?: IHaptics;
   private _milestoneRepository?: IMilestoneRepository;
   private _notificationRepository?: INotificationRepository;
   private _subscriptionRepository?: ISubscriptionRepository;
@@ -190,6 +194,16 @@ export class DIContainer {
   getImagePicker(): IImagePicker {
     this._imagePicker ??= new ExpoImagePicker();
     return this._imagePicker;
+  }
+
+  /**
+   * Adapter haptics — UI/animation chỉ phụ thuộc interface IHaptics.
+   * Tự dùng expo-haptics nếu nạp được, ngược lại fallback NoopHaptics
+   * (vd web, hoặc chưa cài expo-haptics) để app không vỡ.
+   */
+  getHaptics(): IHaptics {
+    this._haptics ??= ExpoHaptics.isAvailable() ? new ExpoHaptics() : new NoopHaptics();
+    return this._haptics;
   }
 
   getMilestoneRepository(): IMilestoneRepository {
