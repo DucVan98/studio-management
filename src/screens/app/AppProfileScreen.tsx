@@ -5,6 +5,8 @@ import { useValue } from '@legendapp/state/react';
 import { useNavigation } from '@react-navigation/native';
 import { authStore$, authActions } from '../../stores/auth.store';
 import { appStore$, appActions } from '../../stores/app.store';
+import { onboardingActions } from '../../stores/onboarding.store';
+import { useLogout } from '../../queries/hooks/auth.queries';
 import { AnimatedToggle, ConfirmModal, Screen } from '../../components/ui';
 
 /** Một hàng cài đặt có công tắc animated. */
@@ -36,6 +38,7 @@ export function AppProfileScreen() {
   const [pushOn, setPushOn] = useState(true);
   const [reminderOn, setReminderOn] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const logout = useLogout();
 
   // Chế độ tối nối thẳng theme store → đổi giao diện thật ngay lập tức.
   const toggleDark = (next: boolean) => appActions.setTheme(next ? 'midnight-gold' : 'rose-romantic');
@@ -50,7 +53,14 @@ export function AppProfileScreen() {
 
   const handleLogoutConfirm = () => {
     setShowLogoutModal(false);
+    // Logout thật: LogoutUseCase clear secure session (refresh token) — best-effort
+    // gọi server, nhưng LUÔN xoá session local. Nếu chỉ clear store in-memory,
+    // token vẫn nằm trong SecureStore nên lần mở app sau restore() lại "đăng nhập".
+    logout.mutate(undefined);
     authActions.logout();
+    // Xoá onboarding đã persist trong MMKV — nếu không, relationshipStartDate cũ
+    // còn sót khiến lần đăng nhập sau bị đẩy nhầm vào màn Invite.
+    onboardingActions.reset();
     navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
