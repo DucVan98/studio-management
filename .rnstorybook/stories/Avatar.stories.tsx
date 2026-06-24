@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-native';
 import { View } from 'react-native';
 
 import { Avatar, AvatarPair } from '../../src/components/ui';
+import { Replay } from './replay';
 
 const meta = {
   title: 'UI/Avatar',
@@ -38,5 +39,14 @@ export const AllColors: Story = {
 export const Pair: Story = {
   render: () => (
     <AvatarPair left={{ name: 'Anh' }} right={{ name: 'Em' }} size="lg" />
+  ),
+};
+
+// Hai avatar trượt lại gần + tim bật ra (màn "Đã kết nối"). Bấm "Phát lại".
+export const PairJoin: Story = {
+  render: () => (
+    <Replay>
+      <AvatarPair left={{ name: 'Anh' }} right={{ name: 'Em' }} size="xl" animateJoin />
+    </Replay>
   ),
 };

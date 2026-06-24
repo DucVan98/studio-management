@@ -28,6 +28,26 @@ export { Screen } from './Screen';
 export { ScreenHeader } from './ScreenHeader';
 export { SectionHeader } from './SectionHeader';
 
+// Animation primitives & data-viz
+export { AnimatedCounter } from './AnimatedCounter';
+export { AnimatedListItem } from './AnimatedListItem';
+export { HeartbeatLoader } from './HeartbeatLoader';
+export { ProgressRing } from './ProgressRing';
+export { BarChart } from './BarChart';
+export { AchievementBadge } from './AchievementBadge';
+export { Confetti } from './Confetti';
+export { Toast } from './Toast';
+export type { ToastType } from './Toast';
+export { AnimatedToggle } from './AnimatedToggle';
+export { ShineOverlay } from './ShineOverlay';
+export { SplashLogo } from './SplashLogo';
+export { ParallaxScrollView } from './ParallaxScrollView';
+export { OtpInput } from './OtpInput';
+export { HeartPullToRefresh } from './HeartPullToRefresh';
+
+// Haptics hook (adapter qua DIContainer)
+export { useHaptics } from './useHaptics';
+
 // List rows
 export { MilestoneRow } from './MilestoneRow';
 export { NotificationItem } from './NotificationItem';

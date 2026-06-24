@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-native';
 import { View } from 'react-native';
 
 import { ProgressBar } from '../../src/components/ui';
+import { Replay } from './replay';
 
 const meta = {
   title: 'UI/ProgressBar',
@@ -14,6 +15,17 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 export const Thick: Story = { args: { height: 12 } };
+
+// Fill chạy mượt khi mount — bấm "Phát lại" để xem lại.
+export const Animated: Story = {
+  render: () => (
+    <Replay>
+      <View style={{ width: 280 }}>
+        <ProgressBar value={0.85} />
+      </View>
+    </Replay>
+  ),
+};
 
 export const AllColors: Story = {
   render: () => (

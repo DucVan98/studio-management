@@ -4,6 +4,7 @@ import './src/i18n';
 import { useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   SafeAreaProvider,
   SafeAreaInsetsContext,
@@ -142,6 +143,9 @@ export default function App() {
   }, [appReady]);
 
   return (
+    // GestureHandlerRootView phải bọc ngoài cùng để các animation dùng cử chỉ
+    // (GestureDetector: double-tap thả tim, pan…) hoạt động trên toàn app.
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <QueryClientProvider client={queryClient}>
         {/* themeVars inject CSS variables cho toàn bộ cây component */}
@@ -175,5 +179,6 @@ export default function App() {
         </View>
       </QueryClientProvider>
     </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
+import { AnimatedCounter } from './AnimatedCounter';
 
 /**
  * Figma CountdownCard — couple app signature widget
@@ -59,9 +60,11 @@ export function CountdownCard({
         <Text className="text-body-sm font-semibold text-on-accent/80">{displayLabel}</Text>
       </View>
 
-      <Text className="text-display-lg font-bold text-on-accent leading-none mb-1">
-        {days.toLocaleString('vi-VN')}
-      </Text>
+      {/* Số ngày chạy tăng dần khi card xuất hiện (signature animation). */}
+      <AnimatedCounter
+        value={days}
+        className="text-display-lg font-bold text-on-accent leading-none mb-1"
+      />
       <Text className="text-body-sm font-medium text-on-accent/70">ngày</Text>
 
       {subtitle ? (

@@ -1,9 +1,22 @@
-import { useEffect, useMemo } from 'react';
-import { View, Animated } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import type { LayoutChangeEvent } from 'react-native';
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 
 /**
- * Figma Skeleton / loading placeholder — shimmer opacity pulse
- * Dùng khi đang fetch data thay thế cho component thật
+ * Figma Skeleton / loading placeholder — vệt sáng (shimmer) quét qua nền.
+ * Dùng khi đang fetch data thay thế cho component thật.
+ *
+ * Dùng Reanimated (UI thread) thay cho Animated cũ của RN → mượt hơn, đồng bộ
+ * với phần animation còn lại của app. Tôn trọng Reduce Motion (đứng yên).
  *
  * @example
  * <Skeleton width="100%" height={80} radius={20} />
@@ -19,25 +32,40 @@ interface SkeletonProps {
   className?: string;
 }
 
+const SHIMMER_DURATION = 1300;
+
 function SkeletonBase({ width, height, radius = 8, className = '' }: SkeletonProps) {
-  const opacity = useMemo(() => new Animated.Value(0.4), []);
+  const [trackWidth, setTrackWidth] = useState(0);
+  const x = useSharedValue(0);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 1,   duration: 800, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.4, duration: 800, useNativeDriver: true }),
-      ]),
-    );
-    anim.start();
-    return () => anim.stop();
-  }, [opacity]);
+    if (reduced) return;
+    x.value = withRepeat(withTiming(1, { duration: SHIMMER_DURATION, easing: Easing.linear }), -1, false);
+  }, [reduced, x]);
+
+  // Dải sáng rộng ~50% track, trượt từ trái qua phải.
+  const bandWidth = trackWidth * 0.5;
+  const bandStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: interpolate(x.value, [0, 1], [-bandWidth, trackWidth]) }],
+  }));
+
+  const onLayout = (e: LayoutChangeEvent) => setTrackWidth(e.nativeEvent.layout.width);
 
   return (
-    <Animated.View
-      className={`bg-surface-alt ${className}`}
-      style={{ width, height, borderRadius: radius, opacity }}
-    />
+    <View
+      className={`bg-surface-alt overflow-hidden ${className}`}
+      style={{ width, height, borderRadius: radius }}
+      onLayout={onLayout}
+    >
+      {!reduced && trackWidth > 0 && (
+        <Animated.View
+          className="bg-white/40 h-full"
+          style={[{ position: 'absolute', top: 0, bottom: 0, width: bandWidth }, bandStyle]}
+          pointerEvents="none"
+        />
+      )}
+    </View>
   );
 }
 

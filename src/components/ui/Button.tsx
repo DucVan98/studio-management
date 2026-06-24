@@ -1,7 +1,14 @@
-import { TouchableOpacity, Text, ActivityIndicator } from 'react-native';
-import type { TouchableOpacityProps } from 'react-native';
+import { Pressable, Text, ActivityIndicator } from 'react-native';
+import type { PressableProps, GestureResponderEvent } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
+import { useHaptics } from './useHaptics';
 
 /**
  * Figma Button component
@@ -9,12 +16,15 @@ import type { IconName } from './Icon';
  * Variant=Secondary → bg-surface border, text-accent, rounded-pill
  * Variant=Ghost     → transparent, text-accent
  * Variant=Danger    → nền hồng nhạt (#FFEEEE), chữ đỏ đậm (#C62626), viền đỏ nhạt (#E2B9B9)
+ *
+ * Animation: nhấn xuống co lại nhẹ (spring scale) + rung haptic light → cảm giác
+ * "bấm được". Tôn trọng Reduce Motion (tắt scale).
  */
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'sm' | 'md' | 'lg';
 
-interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
+interface ButtonProps extends Omit<PressableProps, 'style' | 'children'> {
   label: string;
   variant?: Variant;
   size?: Size;
@@ -22,6 +32,8 @@ interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
   fullWidth?: boolean;
   leftIcon?: IconName;
   rightIcon?: IconName;
+  /** Bật rung haptic khi nhấn. Mặc định true. */
+  haptic?: boolean;
   /** Class bổ sung để override style mặc định khi cần */
   className?: string;
 }
@@ -41,6 +53,9 @@ const SIZE: Record<Size, { container: string; text: string }> = {
   lg: { container: 'px-8 py-4 rounded-pill', text: 'text-body-lg font-medium' },
 };
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const PRESS_SPRING = { damping: 15, stiffness: 320 } as const;
+
 export function Button({
   label,
   variant = 'primary',
@@ -49,16 +64,34 @@ export function Button({
   fullWidth = false,
   leftIcon,
   rightIcon,
+  haptic = true,
   disabled,
   className,
+  onPressIn,
+  onPressOut,
   ...rest
 }: ButtonProps) {
   const v = VARIANT[variant];
   const s = SIZE[size];
   const isDisabled = disabled || loading;
+  const haptics = useHaptics();
+
+  const scale = useSharedValue(1);
+  const reduced = useReducedMotion();
+  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  const handlePressIn = (e: GestureResponderEvent) => {
+    if (!reduced) scale.set(withSpring(0.96, PRESS_SPRING));
+    if (haptic) haptics.impact('light');
+    onPressIn?.(e);
+  };
+  const handlePressOut = (e: GestureResponderEvent) => {
+    scale.set(withSpring(1, PRESS_SPRING));
+    onPressOut?.(e);
+  };
 
   return (
-    <TouchableOpacity
+    <AnimatedPressable
       className={[
         'flex-row items-center justify-center gap-2',
         v.container, s.container,
@@ -66,8 +99,10 @@ export function Button({
         isDisabled ? 'opacity-50' : '',
         className ?? '',
       ].join(' ')}
+      style={animatedStyle}
       disabled={isDisabled}
-      activeOpacity={0.8}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       {...rest}
     >
       {loading ? (
@@ -79,6 +114,6 @@ export function Button({
       {rightIcon && !loading && (
         <Icon name={rightIcon} size="sm" color={v.iconColor} />
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }

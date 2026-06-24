@@ -1,10 +1,18 @@
+import { useEffect } from 'react';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
 import { useThemeColors } from '../../tokens/useThemeColors';
+import { useHaptics } from './useHaptics';
 import {
   NavBarBackdrop,
   BAR_HEIGHT,
@@ -63,6 +71,12 @@ const CENTER_SPACER = 72;
 export function NavBar({ activeTab, onTabPress, onFabPress, state, navigation }: NavBarProps) {
   const insets = useSafeAreaInsets();
   const bottomPad = insets.bottom || (Platform.OS === 'ios' ? 16 : 8);
+
+  // FAB: nhấn xuống co lại (spring) + rung medium → cảm giác bấm chắc tay.
+  const haptics = useHaptics();
+  const reduced = useReducedMotion();
+  const fabScale = useSharedValue(1);
+  const fabStyle = useAnimatedStyle(() => ({ transform: [{ scale: fabScale.value }] }));
 
   // Resolve active tab từ navigation state nếu không truyền activeTab.
   // state.routes map 1-1 với TABS (FAB không phải route).
@@ -125,7 +139,16 @@ export function NavBar({ activeTab, onTabPress, onFabPress, state, navigation }:
 
       {/* FAB hit-area – hình do backdrop vẽ, đây chỉ là vùng chạm + icon */}
       <TouchableOpacity
-        onPress={onFabPress}
+        onPress={() => {
+          haptics.impact('medium');
+          onFabPress?.();
+        }}
+        onPressIn={() => {
+          if (!reduced) fabScale.set(withSpring(0.9, { damping: 14, stiffness: 320 }));
+        }}
+        onPressOut={() => {
+          fabScale.set(withSpring(1, { damping: 14, stiffness: 320 }));
+        }}
         activeOpacity={0.7}
         className="absolute items-center justify-center self-center"
         style={{
@@ -135,7 +158,9 @@ export function NavBar({ activeTab, onTabPress, onFabPress, state, navigation }:
           borderRadius: FAB_SIZE / 2,
         }}
       >
-        <Icon name="plus" size={28} color="#FFFFFF" />
+        <Animated.View style={fabStyle}>
+          <Icon name="plus" size={28} color="#FFFFFF" />
+        </Animated.View>
       </TouchableOpacity>
     </View>
   );
@@ -150,18 +175,33 @@ function TabButton({
 }: { tab: TabItem; active: boolean; onPress: () => void }) {
   const { t } = useTranslation();
   const colors = useThemeColors();
+  const haptics = useHaptics();
+  const reduced = useReducedMotion();
+
+  // Tab đang chọn: icon nảy lên to hơn một chút (spring).
+  const scale = useSharedValue(active ? 1.15 : 1);
+  useEffect(() => {
+    scale.value = reduced ? (active ? 1.15 : 1) : withSpring(active ? 1.15 : 1, { damping: 12, stiffness: 260 });
+  }, [active, reduced, scale]);
+  const iconStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
   return (
     <TouchableOpacity
       className="flex-1 items-center justify-center gap-0.5 py-1"
-      onPress={onPress}
+      onPress={() => {
+        haptics.selection();
+        onPress();
+      }}
       activeOpacity={0.7}
     >
       {/* Màu phải là hex resolve theo theme — vector-icons không hiểu var(--*) */}
-      <Icon
-        name={tab.icon}
-        size="lg"
-        color={active ? colors['--color-accent'] : colors['--color-text-muted']}
-      />
+      <Animated.View style={iconStyle}>
+        <Icon
+          name={tab.icon}
+          size="lg"
+          color={active ? colors['--color-accent'] : colors['--color-text-muted']}
+        />
+      </Animated.View>
       <Text
         className={[
           'text-label',
