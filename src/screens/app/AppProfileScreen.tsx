@@ -4,13 +4,41 @@ import { useTranslation } from 'react-i18next';
 import { useValue } from '@legendapp/state/react';
 import { useNavigation } from '@react-navigation/native';
 import { authStore$, authActions } from '../../stores/auth.store';
-import { ConfirmModal, Screen } from '../../components/ui';
+import { appStore$, appActions } from '../../stores/app.store';
+import { AnimatedToggle, ConfirmModal, Screen } from '../../components/ui';
+
+/** Một hàng cài đặt có công tắc animated. */
+function SettingToggleRow({
+  label,
+  value,
+  onValueChange,
+  divider,
+}: {
+  label: string;
+  value: boolean;
+  onValueChange: (next: boolean) => void;
+  divider?: boolean;
+}) {
+  return (
+    <View className={`flex-row items-center px-5 py-4 ${divider ? 'border-b border-border' : ''}`}>
+      <Text className="flex-1 text-body-md font-medium text-text">{label}</Text>
+      <AnimatedToggle value={value} onValueChange={onValueChange} />
+    </View>
+  );
+}
 
 export function AppProfileScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const user = useValue(authStore$.user);
+  const theme = useValue(appStore$.theme);
+  const isDark = theme === 'midnight-gold';
+  const [pushOn, setPushOn] = useState(true);
+  const [reminderOn, setReminderOn] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // Chế độ tối nối thẳng theme store → đổi giao diện thật ngay lập tức.
+  const toggleDark = (next: boolean) => appActions.setTheme(next ? 'midnight-gold' : 'rose-romantic');
 
   const menuItems = [
     { id: '1', icon: '✏️', label: t('profile.editProfile') },
@@ -61,6 +89,16 @@ export function AppProfileScreen() {
               <Text className="text-text-muted">›</Text>
             </TouchableOpacity>
           ))}
+        </View>
+
+        {/* Cài đặt nhanh — công tắc animated */}
+        <Text className="text-body-sm font-semibold text-text-muted mt-6 mb-2 px-1">
+          {t('settings.quickSettings')}
+        </Text>
+        <View className="bg-surface rounded-2xl overflow-hidden shadow-sm">
+          <SettingToggleRow label={t('settings.darkMode')} value={isDark} onValueChange={toggleDark} divider />
+          <SettingToggleRow label={t('settings.pushNotifications')} value={pushOn} onValueChange={setPushOn} divider />
+          <SettingToggleRow label={t('settings.memoryReminders')} value={reminderOn} onValueChange={setReminderOn} />
         </View>
 
         {/* Nút đăng xuất — mở ConfirmModal thay vì OS Alert */}

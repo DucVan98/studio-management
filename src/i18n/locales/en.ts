@@ -77,5 +77,9 @@ export default {
     notifications: 'Notifications',
     privacy: 'Privacy',
     about: 'About',
+    quickSettings: 'Quick settings',
+    darkMode: 'Dark mode',
+    pushNotifications: 'Push notifications',
+    memoryReminders: 'Memory reminders',
   },
 } as const;

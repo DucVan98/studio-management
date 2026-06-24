@@ -77,5 +77,9 @@ export default {
     notifications: 'Thông báo',
     privacy: 'Quyền riêng tư',
     about: 'Về ứng dụng',
+    quickSettings: 'Cài đặt nhanh',
+    darkMode: 'Chế độ tối',
+    pushNotifications: 'Thông báo đẩy',
+    memoryReminders: 'Nhắc kỷ niệm',
   },
 } as const;

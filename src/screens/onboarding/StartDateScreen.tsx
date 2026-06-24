@@ -1,7 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Button, Icon, Pill } from '../../components/ui';
+import Animated, {
+  FadeIn,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+import { Button, Icon, Pill, useHaptics } from '../../components/ui';
 import { OnboardingScreen, OnboardingHeading } from '../../components/onboarding';
 import { onboardingActions } from '../../stores/onboarding.store';
 import type { DateType } from '../../stores/onboarding.store';
@@ -20,6 +27,36 @@ const DATE_TYPES = [
 type DateTypeKey = (typeof DATE_TYPES)[number]['key'];
 
 const pad = (n: number) => String(n).padStart(2, '0');
+
+const CELL_SPRING = { damping: 13, stiffness: 240 } as const;
+
+/** Ô ngày trong lịch — khi chọn, nền accent "bung" ra (spring pop) + rung nhẹ. */
+function DayCell({ day, selected, onSelect }: { day: number; selected: boolean; onSelect: () => void }) {
+  const reduced = useReducedMotion();
+  const haptics = useHaptics();
+  const sel = useSharedValue(selected ? 1 : 0);
+
+  useEffect(() => {
+    sel.value = reduced ? (selected ? 1 : 0) : withSpring(selected ? 1 : 0, CELL_SPRING);
+  }, [selected, reduced, sel]);
+
+  // Nền tròn accent hiện ra (opacity) + phóng từ nhỏ → to (pop).
+  const circleStyle = useAnimatedStyle(() => ({ opacity: sel.value, transform: [{ scale: sel.value }] }));
+
+  return (
+    <TouchableOpacity
+      className="w-9 h-9 items-center justify-center"
+      activeOpacity={0.7}
+      onPress={() => {
+        haptics.selection();
+        onSelect();
+      }}
+    >
+      <Animated.View className="absolute w-9 h-9 rounded-pill bg-accent" style={circleStyle} pointerEvents="none" />
+      <Text className={`text-body-md ${selected ? 'text-on-accent font-bold' : 'text-text'}`}>{day}</Text>
+    </TouchableOpacity>
+  );
+}
 
 /** Màn 4 · Ngày bắt đầu (Figma 78:195). */
 export function StartDateScreen() {
@@ -124,32 +161,26 @@ export function StartDateScreen() {
             ))}
           </View>
 
-          {weeks.map((row, ri) => (
-            <View key={ri} className="flex-row">
-              {row.map((d, ci) => (
-                <View key={ci} className="flex-1 items-center py-1">
-                  {d === null ? (
-                    <View className="w-9 h-9" />
-                  ) : (
-                    <TouchableOpacity
-                      onPress={() => setSelected(new Date(view.year, view.month, d))}
-                      className={`w-9 h-9 rounded-pill items-center justify-center ${
-                        isSelected(d) ? 'bg-accent' : ''
-                      }`}
-                    >
-                      <Text
-                        className={`text-body-md ${
-                          isSelected(d) ? 'text-on-accent font-bold' : 'text-text'
-                        }`}
-                      >
-                        {d}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              ))}
-            </View>
-          ))}
+          {/* key theo tháng → lưới fade mượt mỗi khi đổi tháng */}
+          <Animated.View key={`${view.year}-${view.month}`} entering={FadeIn.duration(220)}>
+            {weeks.map((row, ri) => (
+              <View key={ri} className="flex-row">
+                {row.map((d, ci) => (
+                  <View key={ci} className="flex-1 items-center py-1">
+                    {d === null ? (
+                      <View className="w-9 h-9" />
+                    ) : (
+                      <DayCell
+                        day={d}
+                        selected={isSelected(d)}
+                        onSelect={() => setSelected(new Date(view.year, view.month, d))}
+                      />
+                    )}
+                  </View>
+                ))}
+              </View>
+            ))}
+          </Animated.View>
         </View>
 
         <View className="flex-1" />
