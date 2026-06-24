@@ -2,7 +2,7 @@
 // Import global.css để NativeWind inject styles giống App.tsx.
 import '../global.css';
 
-import { createElement } from 'react';
+import { createElement, useEffect } from 'react';
 import { registerRootComponent } from 'expo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
@@ -12,6 +12,7 @@ import {
   DMSans_700Bold,
 } from '@expo-google-fonts/dm-sans';
 
+import { splashScreen } from '../src/services/SplashScreenService';
 import { view } from './storybook.requires';
 
 const StorybookUIRoot = view.getStorybookUI({
@@ -30,6 +31,11 @@ function StorybookRoot() {
     DMSans_500Medium,
     DMSans_700Bold,
   });
+  // Nitro splash auto-show và giữ tới khi gọi hide() — App.tsx ẩn nó, nhưng entry
+  // Storybook không qua App.tsx nên phải tự ẩn, nếu không sẽ kẹt mãi ở splash.
+  useEffect(() => {
+    if (fontsLoaded || fontError) splashScreen.hide(200);
+  }, [fontsLoaded, fontError]);
   if (!fontsLoaded && !fontError) return null;
   return createElement(StorybookUIRoot);
 }
