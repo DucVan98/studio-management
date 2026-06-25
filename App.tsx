@@ -49,10 +49,21 @@ const linking: LinkingOptions<RootStackParamList> = {
 // Tổng ngân sách boot là 5s cho TẤT CẢ bước (restore + getCouple) — truyền
 // deadline chung để không cộng dồn timeout của từng bước (tránh treo ~10s).
 const BOOT_BUDGET_MS = 5000;
-const withBootTimeout = (promise: Promise<unknown>, deadline: number): Promise<unknown> => {
+/**
+ * Race một promise với deadline chung. KHÔNG resolve undefined khi hết giờ —
+ * nếu không, `restore()` chậm (SecureStore treo ở bridgeless) sẽ trả undefined
+ * và `undefined !== null` bị hiểu nhầm là "đã đăng nhập" → đẩy nhầm vào Invite.
+ * Hết giờ → reject để caller fallback về trạng thái an toàn (unauthenticated).
+ */
+function withBootTimeout<T>(promise: Promise<T>, deadline: number): Promise<T> {
   const remaining = Math.max(0, deadline - Date.now());
-  return Promise.race([promise, new Promise<void>(resolve => setTimeout(resolve, remaining))]);
-};
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error('boot timeout')), remaining),
+    ),
+  ]);
+}
 
 /**
  * Chỉ render children khi SafeAreaProvider đã đo xong insets (context khác null).
