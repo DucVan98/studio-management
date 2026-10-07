@@ -16,7 +16,7 @@ import { useThemeColors } from '../../tokens/useThemeColors';
 
 /**
  * Splash khởi động trong app — trái tim bung ra (spring scale + xoay nhẹ),
- * wordmark "everly" mờ dần hiện lên. Gọi `onDone` sau khi xong (để chuyển màn).
+ * wordmark "Studio Management" mờ dần hiện lên. Gọi `onDone` sau khi xong (để chuyển màn).
  *
  * @example
  * <View className="flex-1 items-center justify-center bg-bg">
@@ -30,13 +30,13 @@ const HEART_PATH =
 interface SplashLogoProps {
   /** Đường kính trái tim (px). Mặc định 88. */
   size?: number;
-  /** Chữ hiển thị dưới tim. Mặc định 'everly'. */
+  /** Chữ hiển thị dưới tim. Mặc định 'studio-management'. */
   wordmark?: string;
   /** Gọi khi animation hoàn tất. */
   onDone?: () => void;
 }
 
-export function SplashLogo({ size = 88, wordmark = 'everly', onDone }: SplashLogoProps) {
+export function SplashLogo({ size = 88, wordmark = 'studio-management', onDone }: SplashLogoProps) {
   const colors = useThemeColors();
   const accent = colors['--color-accent'];
   const reduced = useReducedMotion();

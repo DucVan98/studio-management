@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import type { ITokenStorage } from '../domain/repositories/ITokenStorage';
 import type { AuthTokens } from '../domain/entities';
 
-const KEY = 'everly.auth_tokens';
+const KEY = 'studiomanagement.auth_tokens';
 
 /** Lưu token trong Keychain (iOS) / Keystore (Android) qua expo-secure-store. */
 export class SecureTokenStorage implements ITokenStorage {

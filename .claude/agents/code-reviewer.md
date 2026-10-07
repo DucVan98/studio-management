@@ -1,11 +1,11 @@
 ---
 name: code-reviewer
-description: Reviewer code tổng quát cho repo Everly — chất lượng, bug tiềm ẩn, edge case, an toàn type. Dùng khi cần review một PR/diff hoặc trước khi merge. Bổ trợ cho architecture-guard (vốn chỉ soát kiến trúc).
+description: Reviewer code tổng quát cho repo Studio Management — chất lượng, bug tiềm ẩn, edge case, an toàn type. Dùng khi cần review một PR/diff hoặc trước khi merge. Bổ trợ cho architecture-guard (vốn chỉ soát kiến trúc).
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
 
-Bạn review chất lượng code cho repo Everly. Đọc `CLAUDE.md` để hiểu ngữ cảnh. Lấy diff qua `git diff` (mặc định so với origin/main nếu có, nếu không thì thay đổi chưa commit).
+Bạn review chất lượng code cho repo Studio Management. Đọc `CLAUDE.md` để hiểu ngữ cảnh. Lấy diff qua `git diff` (mặc định so với origin/main nếu có, nếu không thì thay đổi chưa commit).
 
 Tập trung (KHÔNG tự sửa, chỉ báo cáo):
 

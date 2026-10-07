@@ -1,131 +1,145 @@
-# Everly — Hướng dẫn cho Claude Code
+# Studio Management — Development Guide
 
-App React Native (Expo SDK 53) cho các cặp đôi: lưu memories, milestones, couple stats, notifications, subscription. Code theo **Clean Architecture** nghiêm ngặt. Đọc kỹ file này trước khi sửa code.
+React Native (Expo SDK 56) app following **Clean Architecture** principles.
 
-## Lệnh hay dùng
+## Quick Start
 
 ```bash
+pnpm install
 pnpm start          # Expo dev server
-pnpm ios / android  # Build & chạy native
-pnpm typecheck      # tsc --noEmit — CHẠY sau mỗi thay đổi
-pnpm lint           # eslint --fix
-pnpm lint:check     # eslint không sửa (dùng trong CI)
-pnpm test           # jest (jest-expo)
+pnpm typecheck      # TypeScript check
+pnpm lint           # ESLint
 ```
 
-> Dùng `pnpm` (KHÔNG dùng npm/yarn). Đây là pnpm workspace.
-
-Khi commit: dùng skill `/commit` — message theo Conventional Commits v1.0.0, mô tả tiếng Việt.
-
-## Tech stack
-
-- **State server**: TanStack Query v5 (qua `src/queries/`)
-- **State local**: Legend-State v3 observables (`src/stores/`, persist MMKV)
-- **Navigation**: React Navigation v7 (native-stack + bottom-tabs)
-- **Styling**: NativeWind v4 — chỉ dùng `className`, KHÔNG dùng `StyleSheet`. Token thiết kế đặt trong `tailwind.config.ts` (vd `bg-accent`, `text-body-md`, `rounded-pill`).
-- **i18n**: i18next + react-i18next, locale `en` và `vi` (`src/i18n/locales/`)
-- **HTTP**: client tự viết trong `src/http/` (KHÔNG dùng axios/fetch trực tiếp)
-- **DI**: container thủ công `src/di/DIContainer.ts`
-- **Alias**: `@/*` → `./src/*`. Trong `src/` đang dùng import tương đối — giữ nhất quán với file lân cận.
-
-## Kiến trúc — luật phụ thuộc (QUAN TRỌNG NHẤT)
-
-Phụ thuộc chỉ đi **một chiều, vào trong**. `domain` là lõi và KHÔNG được import từ tầng ngoài.
+## Architecture
 
 ```
-presentation (screens, components, navigation, queries, stores)
-      │  được phép import ▼
-   domain (entities, usecases, repositories[interface], errors)  ← LÕI, không phụ thuộc ai
-      ▲  hiện thực hoá ▲
-   data (datasources, repositories[impl], mappers, types)
+presentation (screens, components, navigation)
+      │ import ▼
+   domain (entities, usecases, repositories[interface], errors)  ← CORE
+      ▲ implement ▲
+   data (datasources, repositories[impl], mappers)
       │
-   http / services (hạ tầng)
+   http / services (infrastructure)
 ```
 
-Luật bắt buộc:
+**Rule:** Dependencies flow inward only. `domain` must NOT import from outer layers.
 
-1. `src/domain/**` **không được** import từ `data`, `http`, `queries`, `stores`, `screens`, hay bất kỳ thư viện hạ tầng nào (trừ pure utils). Entity/usecase phải thuần.
-2. Usecase **chỉ phụ thuộc interface** repository (`domain/repositories/I*.ts`), không phụ thuộc impl `Http*Repository`.
-3. UI **không gọi datasource/HTTP trực tiếp**. Luồng đúng: `screen → query hook → usecase → repository(interface) → datasource → HttpClient`.
-4. Lỗi ném ra ngoài domain phải là `AppError` (`src/domain/errors/AppError.ts`), không để lộ lỗi HTTP thô. Mapping HTTP→AppError nằm ở tầng data/http.
-5. Mọi dependency mới phải đăng ký trong `DIContainer.ts` và expose qua getter `getXxxUseCase()`.
-6. **Thư viện bên thứ 3 phải được bọc qua adapter/service riêng** — xem mục dưới.
+## Tech Stack
 
-## Bọc thư viện bên thứ 3 (BẮT BUỘC)
+- **Framework**: React Native + Expo SDK 56
+- **Navigation**: React Navigation v7
+- **State (remote)**: TanStack Query v5 → `src/queries/`
+- **State (local)**: Legend-State v3 → `src/stores/`
+- **Styling**: NativeWind v4 + Tailwind
+- **i18n**: i18next + react-i18next
+- **HTTP**: Custom HttpClient wrapper in `src/http/`
+- **DI**: Manual DIContainer in `src/di/`
 
-Mục tiêu: khi cần đổi sang thư viện khác, chỉ sửa **một file adapter**, không phải sửa rải rác khắp codebase.
+## Directory Structure
 
-Luật:
+```
+src/
+├── components/ui/      # Reusable UI components
+├── config/             # App config (links, constants)
+├── di/                 # DIContainer
+├── http/               # HTTP client wrapper
+├── i18n/               # Internationalization
+├── navigation/         # React Navigation
+├── screens/            # Feature screens
+├── services/           # 3rd-party adapters
+└── tokens/             # Design tokens (colors, spacing)
+```
 
-1. **KHÔNG import trực tiếp** thư viện bên thứ 3 (storage, analytics, notifications, image picker, camera, IAP, crash reporting, date lib…) trong screen, component, usecase, store hay query hook.
-2. Mỗi thư viện phải có **một module/service bọc lại** trong `src/services/` (hoặc `src/http/`, `src/stores/persistence/` tuỳ loại):
-   - Định nghĩa **interface riêng của app** (vd `ISecureStorage`, `IAnalytics`) — API đặt theo nhu cầu của app, KHÔNG sao chép nguyên API của thư viện.
-   - Impl gọi thư viện thật, đặt tên theo thư viện (vd `ExpoSecureTokenStorage`, `MMKVStorageAdapter`) — đây là **file duy nhất** được import thư viện đó.
-   - Đăng ký qua `DIContainer.ts` (hoặc export instance từ service module); nơi dùng chỉ phụ thuộc interface.
-3. Lỗi của thư viện không được lọt ra ngoài adapter ở dạng thô — map sang `AppError` hoặc kiểu lỗi của app.
+## Conventions
 
-Ví dụ đã có sẵn trong repo — làm theo các file này:
+### Dependency Injection
+- Register all dependencies in `DIContainer.ts`
+- Inject via constructor, don't create instances inline
+- One instance per dependency (singleton pattern)
 
-- `src/http/HttpClient.ts` — bọc fetch, cấm dùng axios/fetch trực tiếp.
-- `src/services/SecureTokenStorage.ts` — bọc expo-secure-store.
-- `src/services/mmkv.adapter.ts`, `src/stores/persistence/` — bọc MMKV.
+### Domain Layer (src/domain/)
+- **Entities**: Pure data objects (User, Memory, etc)
+- **Use Cases**: Business logic (`execute(input) → output`)
+- **Repositories**: Interfaces only (`IXxxRepository`)
+- **Errors**: Throw `AppError` with kind codes
 
-Ngoại lệ (KHÔNG cần bọc): React/React Native core, Expo runtime cơ bản, React Navigation, NativeWind, TanStack Query, Legend-State, i18next — đây là framework/nền tảng của app, đã được quy ước cách dùng ở các mục khác. Khi phân vân, hỏi lại trước khi import trực tiếp.
+### Data Layer (src/data/)
+- **DataSources**: HTTP calls, raw data fetch
+- **Repositories**: Implement `IXxxRepository`, map DTO→Entity
+- **Mappers**: Convert between DTO and Entity
+- **Types**: API DTOs (from backend contract)
 
-## Convention theo từng tầng
+### 3rd-Party Libraries (src/services/)
+- **DO**: Wrap every 3rd-party lib in adapter/service
+- **DON'T**: Import libraries directly in screens/usecases
+- Define app-specific interface, one impl per library
+- Map library errors to `AppError`
 
-**Use case** (`src/domain/usecases/<feature>/XxxUseCase.ts`)
-- `implements UseCase<TInput, TOutput>`, đúng 1 method `execute(input)`.
-- Nhận interface repository qua constructor (`private readonly repo: IXxxRepository`).
-- Validate input ở đây, ném `AppError(msg, 'validation')` nếu sai.
+Example:
+```typescript
+// ✅ DO
+export interface ISecureStorage {
+  save(key: string, value: string): Promise<void>;
+  load(key: string): Promise<string | null>;
+}
 
-**Repository**: interface ở `domain/repositories/IXxxRepository.ts`, impl `HttpXxxRepository` ở `data/repositories/`. Impl gọi datasource và map DTO→entity qua `data/mappers/`.
+export class ExpoSecureTokenStorage implements ISecureStorage {
+  async save(key: string, value: string) {
+    await SecureStore.setItemAsync(key, value);  // Only here
+  }
+}
 
-**Query hook** (`src/queries/hooks/<feature>.queries.ts`)
-- Dùng helper `createQuery` / `createParamQuery` / `createMutation` từ `../factory`.
-- Key lấy từ `queryKeys` (`src/queries/keys.ts`) — convention `[domain, scope?, params?]`. Mutation khai báo `invalidates`/`onSuccess` để giữ cache nhất quán.
-- KHÔNG hardcode query key rời rạc; thêm vào factory `keys.ts`.
+// ❌ DON'T
+import * as SecureStore from 'expo-secure-store';  // Don't import in screens
+```
 
-**Store** (`src/stores/xxx.store.ts`): `observable<State>(...)` export tên `xxxStore$`, kèm object `xxxActions`. UI đọc bằng `useValue(store$.field)`.
+### Styling
+- Use `className` + design tokens from `tailwind.config.ts`
+- NO `StyleSheet.create()` or inline styles
+- Token examples: `bg-accent`, `text-body-md`, `rounded-pill`
 
-**Component** (`src/components/ui/`): function component, props có interface rõ ràng, style bằng `className` + token. Map 1-1 từ Figma khi có. Export lại qua `index.ts`.
+### i18n
+- All user-facing strings must exist in BOTH locales
+- Files: `src/i18n/locales/en.ts` and `vi.ts`
+- Use: `const { t } = useTranslation()`
 
-**Icon**: TOÀN BỘ icon phải là SVG render qua `react-native-svg`, dùng component `Icon` (`src/components/ui/Icon.tsx`) với path data trong `iconPaths.tsx`. KHÔNG dùng `@expo/vector-icons` hay icon font khác. Thêm icon mới: export SVG từ Figma (viewBox 24x24, stroke-based, strokeWidth 2) hoặc copy path từ Feather, thêm vào `IconName` + `ICON_PATHS`.
+## When Adding a Feature
 
-**Screen** (`src/screens/<area>/`): bọc `SafeAreaView className="flex-1 bg-bg"`, text người dùng thấy phải qua `t('...')` (cả `en` và `vi`).
+1. **Define entity** in `src/domain/entities/XxxEntity.ts`
+2. **Write use case** in `src/domain/usecases/xxx/XxxUseCase.ts`
+3. **Create repository interface** in `src/domain/repositories/IXxxRepository.ts`
+4. **Implement data layer**:
+   - Datasource interface + impl
+   - Repository impl + mapper
+5. **Register in DIContainer** → `getXxxUseCase()`
+6. **Build query hook** in `src/queries/hooks/xxx.queries.ts`
+7. **Build screen** in `src/screens/xxx/XxxScreen.tsx`
+8. **Add i18n** strings to en.ts + vi.ts
+9. **Run checks**: `pnpm typecheck && pnpm lint`
 
-**Thông báo & xác nhận — KHÔNG dùng `Alert` của React Native/OS**. Dùng 2 component sau từ `src/components/ui/`:
+## TypeScript
 
-| Tình huống | Component | Ví dụ |
-|---|---|---|
-| Lỗi validation, lỗi API, thông báo thành công/info | `<Alert type="error\|warning\|success\|info" title="..." message="..." />` | Lỗi đăng nhập, gửi form thành công |
-| Hỏi xác nhận hành động (có thể huỷ) | `<ConfirmModal ... confirmVariant="primary\|danger" />` | Xoá dữ liệu, đăng xuất |
+- Strict mode enabled (`strict: true`)
+- NO `any` type
+- Use `import type` for type imports
+- Define interfaces for all component props
 
-Luật cụ thể:
-- **`Alert`** hiển thị inline trong màn hình (thêm vào JSX, dùng `useState` để ẩn/hiện). Không dùng toast overlay phức tạp — đặt ngay dưới heading hoặc gần form.
-- **`ConfirmModal`** dùng khi action có hậu quả (xoá, đăng xuất, huỷ kết nối). Dùng `confirmVariant="danger"` nếu action là destructive.
-- `Alert` của `react-native` bị **cấm** trong màn hình — eslint rule `no-restricted-imports` sẽ được thêm vào sau.
+## Testing
 
-## Quy tắc chung
+```bash
+pnpm test
+```
 
-- Comment viết bằng **tiếng Việt** (theo style hiện có trong repo).
-- TypeScript `strict` — không dùng `any`; ưu tiên `unknown` + type guard. Import type dùng `import type`.
-- Mọi chuỗi hiển thị phải có ở CẢ `src/i18n/locales/en.ts` và `vi.ts`.
-- Sau khi sửa code: chạy `pnpm typecheck` và `pnpm lint`. (Hook tự chạy, nhưng vẫn kiểm tra kết quả.)
+Test domain layer (usecases, entities). Mock repositories via interface, not implementations.
 
-### ESLint tự động chặn (xem `eslint.config.js`)
+## Useful Commands
 
-Một phần luật đã được máy enforce, vi phạm sẽ **fail lint** ngay:
-
-- **Luật phụ thuộc layer** qua `import/no-restricted-paths`: `domain` không import được `data/http/queries/stores/screens/...`; `data` không import được presentation. Usecase không import được impl `Http*Repository`.
-- `@typescript-eslint/no-explicit-any` = error (miễn trừ `src/stores/persistence/**`).
-- `@typescript-eslint/consistent-type-imports` = error (autofix — hook tự sửa).
-- `eqeqeq`; cảnh báo `max-lines-per-function`/`max-params`/`complexity` để nhắc SRP (không chặn build).
-
-Những gì máy KHÔNG bắt được (SOLID sâu, đặt tên, trừu tượng hoá, i18n đủ 2 ngôn ngữ) → dùng subagent `architecture-guard` hoặc lệnh `/review-arch`.
-- Hiện chưa có test — khi thêm logic vào usecase, viết unit test cho usecase đó (`*.test.ts`, mock repository interface).
-- API contract đầy đủ ở `everly-api-spec.md` — tham chiếu file này khi thêm endpoint.
-
-## Khi thêm một feature mới (vertical slice)
-
-Theo thứ tự: entity → repository interface → usecase → datasource interface + impl → repository impl + mapper → đăng ký DI → query hook + key → dùng trong screen → i18n → typecheck/lint. Có thể dùng `/new-feature` để Claude làm theo đúng chuỗi này.
+```bash
+pnpm start                  # Dev server
+pnpm ios / pnpm android    # Build & run
+pnpm typecheck              # TS check (run often!)
+pnpm lint                   # ESLint + Prettier
+pnpm lint:check             # ESLint check only (CI)
+pnpm test                   # Jest
+```

@@ -1,35 +1,10 @@
-import type { NavigatorScreenParams } from '@react-navigation/native';
-
-/** Tabs trong khu vực đã đăng nhập. */
-export type AppTabParamList = {
-  Home: undefined;
-  Memories: undefined;
-  Explore: undefined;
-  Profile: undefined;
-};
-
-/** Root stack — toàn bộ luồng auth + onboarding + khu vực app. */
+/** Root stack — bare minimum */
 export type RootStackParamList = {
-  Welcome: undefined;
-  Login: undefined;
-  Register: undefined;
-  ForgotPassword: undefined;
-  VerifyEmail: { userId: string; email?: string };
-  ProfileSetup: undefined;
-  StartDate: undefined;
-  Invite: undefined;
-  EnterCode: undefined;
-  PartnerAccept: { code: string; inviterName?: string };
-  Connected: { partnerName?: string; startDate?: string };
-  App: NavigatorScreenParams<AppTabParamList> | undefined;
+  Home: undefined;
 };
 
-// Cho phép useNavigation()/useRoute() suy luận type mà không cần generic thủ công.
 declare global {
-   
   namespace ReactNavigation {
-    // Pattern chuẩn của React Navigation: phải dùng interface rỗng để merge
-    // RootStackParamList vào RootParamList toàn cục cho useNavigation()/useRoute().
     // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface RootParamList extends RootStackParamList {}
   }

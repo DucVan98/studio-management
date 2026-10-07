@@ -1,9 +1,9 @@
 ---
-description: Nối một API endpoint từ everly-api-spec.md xuống tới query hook
+description: Nối một API endpoint từ studio-management-api-spec.md xuống tới query hook
 argument-hint: <method> <path> (vd "GET /memories/stats")
 ---
 
-Nối endpoint **$ARGUMENTS** xuyên các tầng. Trước hết đọc `everly-api-spec.md` tìm đúng định nghĩa endpoint (request, response, mã lỗi).
+Nối endpoint **$ARGUMENTS** xuyên các tầng. Trước hết đọc `studio-management-api-spec.md` tìm đúng định nghĩa endpoint (request, response, mã lỗi).
 
 1. Thêm DTO request/response vào `src/data/types/api.types.ts` theo đúng spec.
 2. Thêm method vào datasource interface `I<Feature>DataSource.ts` + impl `Http<Feature>DataSource.ts` (gọi HttpClient, không bắt lỗi ở đây).

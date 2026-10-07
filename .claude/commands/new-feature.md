@@ -3,9 +3,9 @@ description: Tạo một feature mới hoàn chỉnh theo Clean Architecture (ve
 argument-hint: <tên feature> (vd "wishlist", "gift")
 ---
 
-Tạo một feature mới tên **$ARGUMENTS** cho app Everly, đi xuyên đủ các tầng theo Clean Architecture. Đọc CLAUDE.md để nắm luật phụ thuộc trước khi bắt đầu.
+Tạo một feature mới tên **$ARGUMENTS** cho app Studio Management, đi xuyên đủ các tầng theo Clean Architecture. Đọc CLAUDE.md để nắm luật phụ thuộc trước khi bắt đầu.
 
-Tham chiếu `everly-api-spec.md` để lấy đúng endpoint, request/response shape.
+Tham chiếu `studio-management-api-spec.md` để lấy đúng endpoint, request/response shape.
 
 Làm theo đúng thứ tự, mỗi bước bám pattern của feature đã có gần nhất (vd `couple` hoặc `milestone`):
 

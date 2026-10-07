@@ -15,7 +15,7 @@ import Animated, {
 import { useThemeColors } from '../../tokens/useThemeColors';
 
 /**
- * Loader "chữ ký" của Everly — trái tim ĐẶC đập theo nhịp tim, kèm các sóng
+ * Loader "chữ ký" của Studio Management — trái tim ĐẶC đập theo nhịp tim, kèm các sóng
  * hình trái tim lan toả ra rồi mờ dần. Dùng thay ActivityIndicator ở màn chờ
  * toàn trang (boot, fetch lớn, đồng bộ).
  *

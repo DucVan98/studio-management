@@ -1,11 +1,11 @@
 import type { ExpoConfig, ConfigContext } from 'expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const bundleId = process.env.BUNDLE_ID ?? 'com.yourcompany.everly';
+  const bundleId = process.env.BUNDLE_ID ?? 'com.yourcompany.studiomanagement';
 
   // Deep link / universal link — đồng bộ với src/config/links.ts (cùng đọc từ env)
-  const scheme = process.env.EXPO_PUBLIC_DEEPLINK_SCHEME ?? 'everly';
-  const universalHost = process.env.EXPO_PUBLIC_UNIVERSAL_LINK_HOST ?? 'https://everly.app';
+  const scheme = process.env.EXPO_PUBLIC_DEEPLINK_SCHEME ?? 'studiomanagement';
+  const universalHost = process.env.EXPO_PUBLIC_UNIVERSAL_LINK_HOST ?? 'https://studio-management.app';
   // Lấy domain trần (bỏ scheme http) cho associatedDomains / intentFilters
   const universalDomain = universalHost.replace(/^https?:\/\//, '');
   const invitePath = process.env.EXPO_PUBLIC_INVITE_PATH ?? 'join';
@@ -15,8 +15,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 
   return {
     ...config,
-    name: 'Everly',
-    slug: 'everly',
+    name: 'Studio Management',
+    slug: 'studio-management',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
@@ -71,9 +71,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         'expo-image-picker',
         {
           photosPermission:
-            'Cho phép Everly truy cập thư viện ảnh để chọn ảnh đại diện và ảnh kỷ niệm.',
+            'Cho phép Studio Management truy cập thư viện ảnh để chọn ảnh đại diện và ảnh kỷ niệm.',
           cameraPermission:
-            'Cho phép Everly dùng camera để chụp ảnh đại diện và ảnh kỷ niệm.',
+            'Cho phép Studio Management dùng camera để chụp ảnh đại diện và ảnh kỷ niệm.',
         },
       ],
       [

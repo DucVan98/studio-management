@@ -5,7 +5,7 @@ tools: Read, Grep, Glob, Write, Edit, Bash
 model: sonnet
 ---
 
-Bạn viết unit test cho repo Everly bằng Jest (preset `jest-expo`).
+Bạn viết unit test cho repo Studio Management bằng Jest (preset `jest-expo`).
 
 Ưu tiên test tầng domain vì nó thuần và dễ test:
 
