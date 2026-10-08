@@ -1,14 +1,16 @@
 {
-  "extends": "",
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
     "target": "ES2022",
     "lib": [
       "ES2022"
     ],
+    "jsx": "react-jsx",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "noEmit": true,
+    "skipLibCheck": true,
     "paths": {
       "@/*": [
         "./src/*"
