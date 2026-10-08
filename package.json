@@ -17,7 +17,6 @@
     "storybook:android": "cross-env STORYBOOK_ENABLED=true EXPO_PUBLIC_STORYBOOK_ENABLED=true expo run:android"
   },
   "dependencies": {
-    "@ducanh261101a/react-native-nitro-splash": "git+https://github.com/ducanh261101a/react-native-nitro-splash.git",
     "@expo-google-fonts/dm-sans": "^0.4.1",
     "@expo/vector-icons": "^15.1.1",
     "@gorhom/bottom-sheet": "^5.2.14",

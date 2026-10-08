@@ -76,13 +76,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
             'Cho phép Studio Management dùng camera để chụp ảnh đại diện và ảnh kỷ niệm.',
         },
       ],
-      [
-        '@ducanh261101a/react-native-nitro-splash',
-        {
-          autoShow: true,
-          autoHide: false,
-        },
-      ],
     ],
     scheme,
   };

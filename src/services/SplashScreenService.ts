@@ -1,4 +1,4 @@
-import { NitroSplash } from '@ducanh261101a/react-native-nitro-splash';
+import * as SplashScreen from 'expo-splash-screen';
 
 /**
  * Interface splash screen riêng của app — chỉ phơi ra những gì app cần,
@@ -6,29 +6,31 @@ import { NitroSplash } from '@ducanh261101a/react-native-nitro-splash';
  */
 export interface ISplashScreen {
   /** Ẩn splash, có thể fade-out trong `fadeDurationMs` mili-giây. */
-  hide(fadeDurationMs?: number): void;
-  /** Giữ splash lại khi native init với autoHide = true. */
-  preventAutoHide(): void;
-  /** Splash đang hiển thị hay không. */
-  readonly isVisible: boolean;
+  hide(fadeDurationMs?: number): Promise<void>;
+  /** Giữ splash lại khi native init. */
+  preventAutoHide(): Promise<void>;
 }
 
 /**
- * Adapter bọc `@ducanh261101a/react-native-nitro-splash`.
+ * Adapter bọc `expo-splash-screen`.
  * Đây là FILE DUY NHẤT được import thư viện này — nơi khác chỉ phụ thuộc ISplashScreen.
  */
-class NitroSplashScreenAdapter implements ISplashScreen {
-  hide(fadeDurationMs = 0): void {
-    NitroSplash.hide({ fadeDurationMs });
+class ExpoSplashScreenAdapter implements ISplashScreen {
+  async hide(fadeDurationMs = 500): Promise<void> {
+    try {
+      await SplashScreen.hideAsync();
+    } catch (e) {
+      console.warn('Failed to hide splash screen:', e);
+    }
   }
 
-  preventAutoHide(): void {
-    NitroSplash.preventAutoHide();
-  }
-
-  get isVisible(): boolean {
-    return NitroSplash.isVisible;
+  async preventAutoHide(): Promise<void> {
+    try {
+      await SplashScreen.preventAutoHideAsync();
+    } catch (e) {
+      console.warn('Failed to prevent auto hide:', e);
+    }
   }
 }
 
-export const splashScreen: ISplashScreen = new NitroSplashScreenAdapter();
+export const splashScreen: ISplashScreen = new ExpoSplashScreenAdapter();
