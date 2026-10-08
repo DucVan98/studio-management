@@ -6,20 +6,20 @@ import { SecureTokenStorage } from '../services/SecureTokenStorage';
  * Mỗi usecase/service được đăng ký 1 lần duy nhất.
  */
 class DIContainerInstance {
-  private static instance: DIContainerInstance;
+  private static instance: DIContainerInstance | null = null;
   private httpClient: AuthHttpClient;
   private tokenStorage: SecureTokenStorage;
 
-  private constructor() {
+  constructor() {
     this.httpClient = new AuthHttpClient();
     this.tokenStorage = new SecureTokenStorage();
   }
 
   static getInstance(): DIContainerInstance {
-    if (!DIContainerInstance.instance) {
-      DIContainerInstance.instance = new DIContainerInstance();
+    if (!this.instance) {
+      this.instance = new DIContainerInstance();
     }
-    return DIContainerInstance.instance;
+    return this.instance;
   }
 
   getHttpClient(): AuthHttpClient {
