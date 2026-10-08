@@ -12,7 +12,7 @@ import Animated, {
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
 import { useThemeColors } from '../../tokens/useThemeColors';
-import { useHaptics } from './useHaptics';
+
 import {
   NavBarBackdrop,
   BAR_HEIGHT,
@@ -73,7 +73,7 @@ export function NavBar({ activeTab, onTabPress, onFabPress, state, navigation }:
   const bottomPad = insets.bottom || (Platform.OS === 'ios' ? 16 : 8);
 
   // FAB: nhấn xuống co lại (spring) + rung medium → cảm giác bấm chắc tay.
-  const haptics = useHaptics();
+  const haptics = 
   const reduced = useReducedMotion();
   const fabScale = useSharedValue(1);
   const fabStyle = useAnimatedStyle(() => ({ transform: [{ scale: fabScale.value }] }));
@@ -175,7 +175,7 @@ function TabButton({
 }: { tab: TabItem; active: boolean; onPress: () => void }) {
   const { t } = useTranslation();
   const colors = useThemeColors();
-  const haptics = useHaptics();
+  const haptics = 
   const reduced = useReducedMotion();
 
   // Tab đang chọn: icon nảy lên to hơn một chút (spring).

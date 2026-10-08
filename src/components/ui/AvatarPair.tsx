@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Avatar } from './Avatar';
 import type { AvatarSize, AvatarColor } from './Avatar';
-import { useHaptics } from './useHaptics';
+
 
 /**
  * Figma AvatarPair — hai avatar chồng lên nhau (left trước right). Offset = 40%.
@@ -46,7 +46,7 @@ export function AvatarPair({ left, right, size = 'md', animateJoin = false }: Av
   const dim = SIZE_DIM[size];
   const overlap = Math.round(dim * 0.4);
   const reduced = useReducedMotion();
-  const haptics = useHaptics();
+  const haptics = 
 
   // 1 = về đúng vị trí; 0 = tách ra xa (bắt đầu). Tĩnh thì luôn 1.
   const join = useSharedValue(animateJoin && !reduced ? 0 : 1);

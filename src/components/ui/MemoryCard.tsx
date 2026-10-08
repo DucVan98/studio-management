@@ -11,7 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Icon } from './Icon';
-import { useHaptics } from './useHaptics';
+
 
 /**
  * Figma MemoryCard component
@@ -47,7 +47,7 @@ export function MemoryCard({
   onPress,
   onLike,
 }: MemoryCardProps) {
-  const haptics = useHaptics();
+  const haptics = 
   const reduced = useReducedMotion();
   const burst = useSharedValue(0);
 

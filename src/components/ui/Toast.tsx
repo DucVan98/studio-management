@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import { Alert } from './Alert';
 import type { AlertType } from './Alert';
-import { useHaptics } from './useHaptics';
+
 
 /**
  * Toast nổi ở đỉnh màn hình — TÁI SỬ DỤNG giao diện `Alert` (nền tinted, bubble
@@ -30,7 +30,7 @@ interface ToastProps {
 }
 
 export function Toast({ visible, title, message, type = 'success', duration = 2600, onHide }: ToastProps) {
-  const haptics = useHaptics();
+  const haptics = 
 
   useEffect(() => {
     if (!visible) return;

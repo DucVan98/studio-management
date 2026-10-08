@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
-import { useHaptics } from './useHaptics';
+
 
 /**
  * Huy hiệu mở khoá thử thách/cột mốc — bật ra (pop: scale + xoay nhẹ) kèm vệt
@@ -33,7 +33,7 @@ interface AchievementBadgeProps {
 
 export function AchievementBadge({ icon = 'award', label, size = 96 }: AchievementBadgeProps) {
   const reduced = useReducedMotion();
-  const haptics = useHaptics();
+  const haptics = 
 
   const scale = useSharedValue(reduced ? 1 : 0);
   const rotate = useSharedValue(reduced ? 0 : -40);

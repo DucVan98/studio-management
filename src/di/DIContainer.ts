@@ -33,4 +33,6 @@ class DIContainerInstance {
   // ── Thêm usecase/repository dưới đây khi mở rộng ──
 }
 
-export const DIContainer = DIContainerInstance;
+export const DIContainer = DIContainerInstance as unknown as {
+  getInstance(): DIContainerInstance;
+};

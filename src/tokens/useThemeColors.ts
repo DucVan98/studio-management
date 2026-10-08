@@ -5,5 +5,5 @@ import { themeColors } from './themes';
  * Dùng khi cần truyền màu vào prop không hỗ trợ NativeWind className.
  */
 export function useThemeColors(): Record<string, string> {
-  return themeColors.light;
+  return themeColors['rose-romantic'];
 }

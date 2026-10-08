@@ -8,7 +8,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useThemeColors } from '../../tokens/useThemeColors';
-import { useHaptics } from './useHaptics';
+
 
 /**
  * Công tắc bật/tắt — knob trượt với spring (hơi nảy), nền đổi màu mượt + rung
@@ -34,7 +34,7 @@ interface AnimatedToggleProps {
 
 export function AnimatedToggle({ value, onValueChange, disabled = false }: AnimatedToggleProps) {
   const colors = useThemeColors();
-  const haptics = useHaptics();
+  const haptics = 
   const reduced = useReducedMotion();
   const p = useSharedValue(value ? 1 : 0);
 
