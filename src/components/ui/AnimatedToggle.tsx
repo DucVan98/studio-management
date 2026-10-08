@@ -34,7 +34,6 @@ interface AnimatedToggleProps {
 
 export function AnimatedToggle({ value, onValueChange, disabled = false }: AnimatedToggleProps) {
   const colors = useThemeColors();
-  const haptics = 
   const reduced = useReducedMotion();
   const p = useSharedValue(value ? 1 : 0);
 

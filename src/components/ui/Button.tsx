@@ -101,7 +101,6 @@ export function Button({
   const v = VARIANT[variant];
   const s = SIZE[size];
   const isDisabled = disabled || loading;
-  const haptics = 
 
   const scale = useSharedValue(1);
   const reduced = useReducedMotion();

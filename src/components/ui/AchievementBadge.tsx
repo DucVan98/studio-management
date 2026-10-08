@@ -33,7 +33,6 @@ interface AchievementBadgeProps {
 
 export function AchievementBadge({ icon = 'award', label, size = 96 }: AchievementBadgeProps) {
   const reduced = useReducedMotion();
-  const haptics = 
 
   const scale = useSharedValue(reduced ? 1 : 0);
   const rotate = useSharedValue(reduced ? 0 : -40);

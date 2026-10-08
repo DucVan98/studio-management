@@ -47,7 +47,6 @@ export function MemoryCard({
   onPress,
   onLike,
 }: MemoryCardProps) {
-  const haptics = 
   const reduced = useReducedMotion();
   const burst = useSharedValue(0);
 
